@@ -1,82 +1,152 @@
 # task1.py
 import time
 import tracemalloc
+import signal
+import sys
 
-# 1. Эталонное решение преподавателя (O(n) по времени и O(k) по памяти)
+# ----------------------------------------------------------------------
+# 1. Эталонное решение преподавателя для сравнения производительности
+# ----------------------------------------------------------------------
 def _reference_solution(numbers: list[int]) -> list[int]:
     return [x**2 for x in numbers if x % 2 == 0]
 
+# Исключение для перехвата зависших функций по тайм-ауту
+class TimeoutException(Exception):
+    pass
+
+def _timeout_handler(signum, frame):
+    raise TimeoutException("Время выполнения превысило допустимый лимит!")
+
+# ----------------------------------------------------------------------
+# Основная функция проверки
+# ----------------------------------------------------------------------
 def check_task1(user_func):
-    """Строгая проверка эффективных алгоритмов"""
+    """
+    Комплексная проверка Задания 1:
+    - Функциональные тесты на корректность вычислений
+    - Замер времени работы (Benchmark)
+    - Замер расхода памяти (Memory Profiling)
+    """
+    print("🚀 Старт комплексной проверки Задания 1\n" + "=" * 65)
     
-    # Задаем жесткие допустимые коэффициенты
-    MAX_TIME_FACTOR = 2.5   # Функция студента не должна быть медленнее эталона более чем в 2.5 раза
-    MAX_EXTRA_MEM_BYTES = 1024 * 500  # Не более 500 КБ сверх необходимого результата
+    # ------------------------------------------------------------------
+    # ЭТАП 1: Функциональное тестирование
+    # ------------------------------------------------------------------
+    print("📋 ЭТАП 1: Проверка корректности работы (Функциональные тесты)")
+    print("-" * 65)
     
-    # Тестовый набор с достаточно большим объемом для явной разницы в сложности O(n)
-    test_data = list(range(1, 500_000))
+    test_cases = [
+        ([1, 2, 3, 4, 5, 6], [4, 16, 36], "Тест 1.1: Базовый список [1, 2, 3, 4, 5, 6]"),
+        ([1, 3, 5], [], "Тест 1.2: Список без чётных чисел [1, 3, 5]"),
+        ([-4, -3, 0, 2], [16, 0, 4], "Тест 1.3: Отрицательные числа и ноль [-4, -3, 0, 2]"),
+        ([], [], "Тест 1.4: Пустой список []"),
+    ]
     
-    print("🚀 Анализ производительности алгоритма...\n" + "-" * 65)
+    func_passed = 0
+    for inp, expected, description in test_cases:
+        try:
+            res = user_func(inp)
+            assert res == expected, f"Получено {res}, ожидалось {expected}"
+            print(f"  ✅ {description} — PASSED")
+            func_passed += 1
+        except AssertionError as e:
+            print(f"  ❌ {description} — FAILED: {e}")
+        except Exception as e:
+            print(f"  ⚠️ {description} — ERROR ({type(e).__name__}): {e}")
+            
+    print(f"\n📊 Результат Этапа 1: {func_passed}/{len(test_cases)} тестов пройдено.")
+    
+    # Если логика не работает, продолжать тесты на производительность нет смысла
+    if func_passed < len(test_cases):
+        print("\n❌ Проверка остановлена: исправьте логические ошибки в коде.")
+        return
+
+    # ------------------------------------------------------------------
+    # ЭТАП 2 и 3: Стресс-тестирование (Время и Память)
+    # ------------------------------------------------------------------
+    print("\n⚡ ЭТАП 2 и 3: Анализ производительности (Время и Память)")
+    print("-" * 65)
+    
+    # Большой массив для выявления алгоритмической сложности O(n^2) и O(n)
+    stress_data = list(range(1, 200_000))
+    
+    # Настройка лимитов
+    TIMEOUT_SECONDS = 3       # Зависающий код режется через 3 секунды
+    MAX_TIME_FACTOR = 3.0     # Не медленнее эталона более чем в 3 раза
+    MAX_EXTRA_MEM_KB = 1024   # Не более 1 МБ избыточной памяти
+    
+    # --- 1. Замер эталонной функции ---
+    tracemalloc.start()
+    t0 = time.perf_counter()
+    ref_res = _reference_solution(stress_data)
+    ref_time = time.perf_counter() - t0
+    _, ref_peak_mem = tracemalloc.get_traced_memory()
+    tracemalloc.stop()
+    
+    # --- 2. Замер студенческой функции с тайм-аутом ---
+    user_time = 0.0
+    user_peak_mem = 0
+    timeout_occurred = False
+    
+    # Включаем таймер безопасности Linux
+    signal.signal(signal.SIGALRM, _timeout_handler)
+    signal.alarm(TIMEOUT_SECONDS)
     
     try:
-        # --- 1. Замер эталонного решения (Benchmark) ---
         tracemalloc.start()
         t0 = time.perf_counter()
-        ref_res = _reference_solution(test_data)
-        ref_time = time.perf_counter() - t0
-        _, ref_peak_mem = tracemalloc.get_traced_memory()
-        tracemalloc.stop()
         
-        # --- 2. Замер студенческого решения ---
-        tracemalloc.start()
-        t0 = time.perf_counter()
-        user_res = user_func(test_data)
+        user_res = user_func(stress_data)
+        
         user_time = time.perf_counter() - t0
         _, user_peak_mem = tracemalloc.get_traced_memory()
-        tracemalloc.stop()
         
-        # --- 3. Валидация правильности ответа ---
-        assert user_res == ref_res, "Функция вернула некорректный результат."
-        
-        # Вычисляем дельты
-        time_ratio = user_time / ref_time if ref_time > 0 else 1.0
-        extra_memory = user_peak_mem - ref_peak_mem
-        
-        # --- 4. Проверка критериев эффективности ---
-        errors = []
-        
-        # Если студент сделал неоптимальный цикл/лишние проходы
-        if time_ratio > MAX_TIME_FACTOR:
-            errors.append(
-                f"Неоптимальная сложность по времени: ваш код в {time_ratio:.1f}x "
-                f"медленнее эталона (допустимо до {MAX_TIME_FACTOR}x)."
-            )
-            
-        # Если студент создавал дубликаты массивов или промежуточные списки
-        if extra_memory > MAX_EXTRA_MEM_BYTES:
-            extra_kb = extra_memory / 1024
-            errors.append(
-                f"Избыточная память: выделено лишних {extra_kb:.1f} KB "
-                f"(возможно, созданы ненужные копии списков или промежуточные структуры)."
-            )
-            
-        # Вывод детального отчёта
-        print(f"📊 Результаты профилирования:")
-        print(f" ⏱ Время работы:  {user_time*1000:.2f} ms (Эталон: {ref_time*1000:.2f} ms | Соотношение: {time_ratio:.2f}x)")
-        print(f" 💾 Пиковая память: {user_peak_mem / (1024*1024):.2f} MB (Избыток: {max(0, extra_memory)/1024:.1f} KB)")
-        print("-" * 65)
-        
-        if errors:
-            print("❌ Задание не зачтено из-за неэффективности:")
-            for err in errors:
-                print(f"   • {err}")
-        else:
-            print("✅ Задание успешно пройдено! Алгоритм оптимален.")
-
-    except AssertionError as e:
-        print(f"❌ Задание не пройдено (Ошибка логики): {e}")
+    except TimeoutException:
+        timeout_occurred = True
     except Exception as e:
-        print(f"⚠️ Произошла ошибка при выполнении: {type(e).__name__}: {e}")
+        print(f"  ⚠️ Ошибка при выполнении стресс-теста: {type(e).__name__}: {e}")
+        return
     finally:
+        signal.alarm(0) # Снимаем таймер
         if tracemalloc.is_tracing():
             tracemalloc.stop()
+
+    # --- 3. Вывод результатов стресс-теста ---
+    if timeout_occurred:
+        print(f"  ⏳ [ВРЕМЯ] TIME LIMIT EXCEEDED!")
+        print(f"     Код выполняется дольше {TIMEOUT_SECONDS} сек (вероятно, используется неоптимальный поиск/цикл O(n²)).")
+        print("\n❌ Задание не зачтено из-за зависания алгоритма.")
+        return
+        
+    # Сверяем результат стресс-теста
+    if user_res != ref_res:
+        print("  ❌ [ОШИБКА] Код вернул некорректный результат на большом массиве.")
+        return
+
+    # Вычисляем дельты
+    time_ratio = user_time / ref_time if ref_time > 0 else 1.0
+    extra_memory_kb = (user_peak_mem - ref_peak_mem) / 1024
+    
+    print(f"  ⏱ Время работы:  {user_time*1000:.2f} ms (Эталон: {ref_time*1000:.2f} ms | Соотношение: {time_ratio:.2f}x)")
+    print(f"  💾 Пиковая память: {user_peak_mem / (1024*1024):.2f} MB (Избыток: {max(0, extra_memory_kb):.1f} KB)")
+    
+    # --- 4. Проверка критериев эффективности ---
+    perf_errors = []
+    
+    if time_ratio > MAX_TIME_FACTOR:
+        perf_errors.append(
+            f"Код работает слишком медленно ({time_ratio:.1f}x от эталона, порог {MAX_TIME_FACTOR}x)."
+        )
+        
+    if extra_memory_kb > MAX_EXTRA_MEM_KB:
+        perf_errors.append(
+            f"Выделено избыточных {extra_memory_kb:.1f} KB ОЗУ (проверьте, нет ли лишних списков/копий)."
+        )
+        
+    print("-" * 65)
+    if perf_errors:
+        print("❌ Задание не зачтено из-за неэффективности:")
+        for err in perf_errors:
+            print(f"   • {err}")
+    else:
+        print("🎉 ВСЕ ТЕСТЫ И БЕНЧМАРКИ УСПЕШНО ПРОЙДЕНЫ!")
