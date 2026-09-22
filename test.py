@@ -1,9 +1,10 @@
 # task1.py
-import time
-import tracemalloc
+import json
+import requests
 import signal
 import sys
-
+import time
+import tracemalloc
 student_info = {"name": "", "group": ""}
 
 def set_student_info(name: str, group: str):
