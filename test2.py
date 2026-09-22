@@ -84,7 +84,7 @@ def check_task1(user_func, github_token: str = None, repo_owner: str = None, rep
         ([], [], "Тест 1.4: Пустой список []"),
     ]
 
-    total = len(test_cases) + 2
+    
     func_passed = 0
     for inp, expected, description in test_cases:
         try:
@@ -97,7 +97,6 @@ def check_task1(user_func, github_token: str = None, repo_owner: str = None, rep
         except Exception as e:
             print(f"  ⚠️ {description} — ERROR ({type(e).__name__}): {e}")
 
-    select_count = select_count + func_passed
     print(f"\n📊 Результат Этапа 1: {func_passed}/{len(test_cases)} тестов пройдено.")
 
     if func_passed < len(test_cases):
@@ -158,14 +157,12 @@ def check_task1(user_func, github_token: str = None, repo_owner: str = None, rep
             f"     Код выполняется дольше {TIMEOUT_SECONDS} сек (вероятно, используется неоптимальный поиск/цикл O(n²)).")
         print("\n❌ Задание не зачтено из-за зависания алгоритма.")
         return
-    else:
-        select_count += 1
+
 
     if user_res != ref_res:
         print("  ❌ [ОШИБКА] Код вернул некорректный результат на большом массиве.")
         return
-    else:
-        select_count += 1
+
 
     time_ratio = user_time / ref_time if ref_time > 0 else 1.0
     extra_memory_kb = (user_peak_mem - ref_peak_mem) / 1024
@@ -199,10 +196,12 @@ def check_task1(user_func, github_token: str = None, repo_owner: str = None, rep
         # Добавляем вызов отправки (передаем токены, если они доступны в вашей программе)
         # Допустим, github_token, repo_owner и repo_name передаются глобально или как аргументы
         metrics = {
-            "total": total,
-            "score": select_count,
+            "total": len(test_cases),
+            "score": func_passed,
             "time_ms": round(user_time * 1000, 2),  # Новое значение: время работы
+            "ref_time":round(ref_time * 1000,2),
             "memory_mb": round(user_peak_mem / (1024 * 1024), 2)  # Новое значение: память
+            "extra_memory":round(max(0,extra_memory_kb)/(1024*1024),2)
         }
         _send_payload_to_github("task1", metrics, github_token, repo_owner, repo_name)
 
