@@ -201,7 +201,7 @@ def check_task1(user_func, github_token: str = None, repo_owner: str = None, rep
             "time_ms": round(user_time * 1000, 2),  # Новое значение: время работы
             "ref_time":round(ref_time * 1000,2),
             "memory_mb":round(user_peak_mem / (1024 * 1024), 2),  # Новое значение: память
-            "extra_memory":round(extra_memory_kb/(1024*1024),2)
+            "extra_memory":round(max(0, extra_memory_kb)/1024,2)
         }
         _send_payload_to_github("task1", metrics, github_token, repo_owner, repo_name)
 
