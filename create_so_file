@@ -1,0 +1,34 @@
+!pip install cython
+%%writefile setup.py
+from setuptools import setup
+from Cython.Build import cythonize
+
+setup(
+    ext_modules = cythonize("test.py", language_level="3")
+)
+# @title ⚙️ Обновление модуля проверок { display-mode: "form" }
+import importlib
+import os
+import sys
+import time
+
+file_name = "test"
+file = file_name + ".py"
+url_lab = f"https://raw.githubusercontent.com/Genia163/ITaP/refs/heads/main/{file_name}.py"
+
+# 1. Удаляем локальный файл, если он существует
+if os.path.exists(file):
+    os.remove(file)
+
+# 2. Добавляем timestamp в конец URL, чтобы пробить кэш GitHub CDN
+RAW_URL = url_lab + f"?v={int(time.time())}"
+!wget -q -O {file} "{RAW_URL}"
+
+# 3. Перезагружаем модуль в памяти Python
+if file_name in sys.modules:
+    test = importlib.reload(sys.modules[file_name])
+else:
+    test = __import__(file_name)
+
+print("✅ Модуль успешно обновился из GitHub!")
+!python setup.py build_ext --inplace
