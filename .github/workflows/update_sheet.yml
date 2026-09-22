@@ -78,7 +78,7 @@ jobs:
               extra_memory = payload.get('extra_memory', 0.0)
               
               # Формируем новую красивую строку для ячейки Google Таблицы
-              new_value = f"Попыток: {attempts} | Балл: {score}/{total} | Время: {time_ms}ms (Эталон: {ref_time}ms) | Память: {memory_mb}MB (Избыток: {extra_memory}MB)"
+              new_value = f"Попыток: {attempts} | Балл: {score}/{total} | Время: {time_ms}ms (Эталон: {ref_time}ms) | Память: {memory_mb}MB (Избыток: {extra_memory}KB)"
               
               # Записываем новые результаты в таблицу!
               sheet.update_cell(row_idx, col_idx, new_value)
