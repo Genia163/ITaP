@@ -180,3 +180,15 @@ def check_task1(user_func):
             print(f"   • {err}")
     else:
         print("🎉 ВСЕ ТЕСТЫ И БЕНЧМАРКИ УСПЕШНО ПРОЙДЕНЫ!")
+        
+def check_quiz_answers(user_answers: dict, github_token: str = None, repo_owner: str = None, repo_name: str = None):
+    """Проверка ответов викторины и отправка балла"""
+    keys = {"q1": "str", "q2": "def", "q3": "1020", "q4": "==", "q5": "4 пробела"}
+    score = sum(1 for q, ans in keys.items() if user_answers.get(q) == ans)
+    total = len(keys)
+    
+    print(f"📊 Результат теста: {score}/{total} баллов.")
+    
+    if github_token:
+        _send_payload_to_github("quiz", {"score": score, "total": total}, github_token, repo_owner, repo_name)
+        
