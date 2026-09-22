@@ -4,6 +4,40 @@ import tracemalloc
 import signal
 import sys
 
+student_info = {"name": "", "group": ""}
+
+def set_student_info(name: str, group: str):
+    """Инициализация ФИО и группы студента"""
+    student_info["name"] = name
+    student_info["group"] = group
+    print(f"👤 Авторизован: {name} (Группа: {group})")
+
+def _send_payload_to_github(payload_type: str, data: dict, github_token: str, repo_owner: str, repo_name: str):
+    """Отправка метрик в GitHub Actions via repository_dispatch"""
+    if not student_info["name"]:
+        print("⚠️ Ошибка: Сначала укажите ФИО и группу через set_student_info()!")
+        return
+
+    url = f"https://api.github.com/repos/{repo_owner}/{repo_name}/dispatches"
+    headers = {
+        "Authorization": f"token {github_token}",
+        "Accept": "application/vnd.github.v3+json"
+    }
+    payload = {
+        "event_type": "update_sheet",
+        "client_payload": {
+            "student": student_info["name"],
+            "group": student_info["group"],
+            "type": payload_type,
+            **data
+        }
+    }
+    res = requests.post(url, headers=headers, data=json.dumps(payload))
+    if res.status_code == 204:
+        print("📡 Результат успешно отправлен в ведомость!")
+    else:
+        print(f"⚠️ Ошибка отправки на GitHub: {res.status_code}")
+
 # ----------------------------------------------------------------------
 # 1. Эталонное решение преподавателя для сравнения производительности
 # ----------------------------------------------------------------------
