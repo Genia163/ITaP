@@ -73,10 +73,12 @@ jobs:
               total = payload.get('total',0)
               score = payload.get('score', 0)
               time_ms = payload.get('time_ms', 0.0)
+              ref_time = payload.get('ref_time',0.0)
               memory_mb = payload.get('memory_mb', 0.0)
+              extra_memory = payload.get('extra_memory', 0.0)
               
               # Формируем новую красивую строку для ячейки Google Таблицы
-              new_value = f"Попыток: {attempts} | Балл: {score}/{total} | Время: {time_ms}ms | Память: {memory_mb}MB"
+              new_value = f"Попыток: {attempts} | Балл: {score}/{total} | Время: {time_ms}ms (Эталон: {ref_time}ms) | Память: {memory_mb}MB (Избыток: {extra_memory}MB)"
               
               # Записываем новые результаты в таблицу!
               sheet.update_cell(row_idx, col_idx, new_value)
