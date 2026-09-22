@@ -199,7 +199,6 @@ def check_task1(user_func, github_token: str = None, repo_owner: str = None, rep
         # Допустим, github_token, repo_owner и repo_name передаются глобально или как аргументы
         if globals().get("github_token"):
             metrics = {
-                "status": "PASSED",
                 "score": select_count,
                 "time_ms": round(user_time * 1000, 2),  # Новое значение: время работы
                 "memory_mb": round(user_peak_mem / (1024 * 1024), 2)  # Новое значение: память
