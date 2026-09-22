@@ -1,14 +1,11 @@
-# task1.py
+# test.py
+import json
+import requests
+import signal
+import sys
 import time
 import tracemalloc
-import signal
-import requests
-import json
 
-class TimeoutException(Exception): pass
-def _timeout_handler(signum, frame): raise TimeoutException("Timeout")
-
-# Глобальный словарь для хранения данных студента в рамках сессии Colab
 student_info = {"name": "", "group": ""}
 
 def set_student_info(name: str, group: str):
@@ -43,61 +40,143 @@ def _send_payload_to_github(payload_type: str, data: dict, github_token: str, re
     else:
         print(f"⚠️ Ошибка отправки на GitHub: {res.status_code}")
 
-def check_task1(user_func, github_token: str = None, repo_owner: str = None, repo_name: str = None):
+# ----------------------------------------------------------------------
+# 1. Эталонное решение преподавателя для сравнения производительности
+# ----------------------------------------------------------------------
+def _reference_solution(numbers: list[int]) -> list[int]:
+    return [x**2 for x in numbers if x % 2 == 0]
+
+# Исключение для перехвата зависших функций по тайм-ауту
+class TimeoutException(Exception):
+    pass
+
+def _timeout_handler(signum, frame):
+    raise TimeoutException("Время выполнения превысило допустимый лимит!")
+
+# ----------------------------------------------------------------------
+# Основная функция проверки
+# ----------------------------------------------------------------------
+def check_task1(user_func):
+    """
+    Комплексная проверка Задания 1:
+    - Функциональные тесты на корректность вычислений
+    - Замер времени работы (Benchmark)
+    - Замер расхода памяти (Memory Profiling)
+    """
     print("🚀 Старт комплексной проверки Задания 1\n" + "=" * 65)
     
-    # 1. Функциональные тесты
+    # ------------------------------------------------------------------
+    # ЭТАП 1: Функциональное тестирование
+    # ------------------------------------------------------------------
+    print("📋 ЭТАП 1: Проверка корректности работы (Функциональные тесты)")
+    print("-" * 65)
+    
     test_cases = [
-        ([1, 2, 3, 4, 5, 6], [4, 16, 36]),
-        ([1, 3, 5], []),
-        ([-4, -3, 0, 2], [16, 0, 4]),
-        ([], [])
+        ([1, 2, 3, 4, 5, 6], [4, 16, 36], "Тест 1.1: Базовый список [1, 2, 3, 4, 5, 6]"),
+        ([1, 3, 5], [], "Тест 1.2: Список без чётных чисел [1, 3, 5]"),
+        ([-4, -3, 0, 2], [16, 0, 4], "Тест 1.3: Отрицательные числа и ноль [-4, -3, 0, 2]"),
+        ([], [], "Тест 1.4: Пустой список []"),
     ]
-    func_passed = True
-    for inp, expected in test_cases:
+    
+    func_passed = 0
+    for inp, expected, description in test_cases:
         try:
-            if user_func(inp) != expected:
-                func_passed = False; break
-        except Exception:
-            func_passed = False; break
-
-    if not func_passed:
-        print("❌ Задание 1 не пройдено (ошибка в логике).")
-        if github_token:
-            _send_payload_to_github("task", {"task_num": 1, "passed": False}, github_token, repo_owner, repo_name)
+            res = user_func(inp)
+            assert res == expected, f"Получено {res}, ожидалось {expected}"
+            print(f"  ✅ {description} — PASSED")
+            func_passed += 1
+        except AssertionError as e:
+            print(f"  ❌ {description} — FAILED: {e}")
+        except Exception as e:
+            print(f"  ⚠️ {description} — ERROR ({type(e).__name__}): {e}")
+            
+    print(f"\n📊 Результат Этапа 1: {func_passed}/{len(test_cases)} тестов пройдено.")
+    
+    if func_passed < len(test_cases):
+        print("\n❌ Проверка остановлена: исправьте логические ошибки в коде.")
         return
 
-    # 2. Стресс-тест (Время и Память)
-    stress_data = list(range(1, 200_000))
-    signal.signal(signal.SIGALRM, _timeout_handler)
-    signal.alarm(3)
+    # ------------------------------------------------------------------
+    # ЭТАП 2 и 3: Стресс-тестирование (Время и Память)
+    # ------------------------------------------------------------------
+    print("\n⚡ ЭТАП 2 и 3: Анализ производительности (Время и Память)")
+    print("-" * 65)
     
-    passed_all = True
+    stress_data = list(range(1, 200_000))
+    
+    TIMEOUT_SECONDS = 3
+    MAX_TIME_FACTOR = 3.0
+    MAX_EXTRA_MEM_KB = 1024
+    
+    # --- 1. Замер эталонной функции ---
+    tracemalloc.start()
+    t0 = time.perf_counter()
+    ref_res = _reference_solution(stress_data)
+    ref_time = time.perf_counter() - t0
+    _, ref_peak_mem = tracemalloc.get_traced_memory()
+    tracemalloc.stop()
+    
+    # --- 2. Замер студенческой функции с тайм-аутом ---
+    user_time = 0.0
+    user_peak_mem = 0
+    timeout_occurred = False
+    
+    signal.signal(signal.SIGALRM, _timeout_handler)
+    signal.alarm(TIMEOUT_SECONDS)
+    
     try:
+        tracemalloc.start()
         t0 = time.perf_counter()
+        
         user_res = user_func(stress_data)
-        elapsed = time.perf_counter() - t0
-        if elapsed > 1.5: passed_all = False
-    except Exception:
-        passed_all = False
+        
+        user_time = time.perf_counter() - t0
+        _, user_peak_mem = tracemalloc.get_traced_memory()
+        
+    except TimeoutException:
+        timeout_occurred = True
+    except Exception as e:
+        print(f"  ⚠️ Ошибка при выполнении стресс-теста: {type(e).__name__}: {e}")
+        return
     finally:
         signal.alarm(0)
+        if tracemalloc.is_tracing():
+            tracemalloc.stop()
 
-    if passed_all:
-        print("🎉 Задание 1 успешно пройдено!")
+    # --- 3. Вывод результатов стресс-теста ---
+    if timeout_occurred:
+        print(f"  ⏳ [ВРЕМЯ] TIME LIMIT EXCEEDED!")
+        print(f"     Код выполняется дольше {TIMEOUT_SECONDS} сек (вероятно, используется неоптимальный поиск/цикл O(n²)).")
+        print("\n❌ Задание не зачтено из-за зависания алгоритма.")
+        return
+        
+    if user_res != ref_res:
+        print("  ❌ [ОШИБКА] Код вернул некорректный результат на большом массиве.")
+        return
+
+    time_ratio = user_time / ref_time if ref_time > 0 else 1.0
+    extra_memory_kb = (user_peak_mem - ref_peak_mem) / 1024
+    
+    print(f"  ⏱ Время работы:  {user_time*1000:.2f} ms (Эталон: {ref_time*1000:.2f} ms | Соотношение: {time_ratio:.2f}x)")
+    print(f"  💾 Пиковая память: {user_peak_mem / (1024*1024):.2f} MB (Избыток: {max(0, extra_memory_kb):.1f} KB)")
+    
+    # --- 4. Проверка критериев эффективности ---
+    perf_errors = []
+    
+    if time_ratio > MAX_TIME_FACTOR:
+        perf_errors.append(
+            f"Код работает слишком медленно ({time_ratio:.1f}x от эталона, порог {MAX_TIME_FACTOR}x)."
+        )
+        
+    if extra_memory_kb > MAX_EXTRA_MEM_KB:
+        perf_errors.append(
+            f"Выделено избыточных {extra_memory_kb:.1f} KB ОЗУ (проверьте, нет ли лишних списков/копий)."
+        )
+        
+    print("-" * 65)
+    if perf_errors:
+        print("❌ Задание не зачтено из-за неэффективности:")
+        for err in perf_errors:
+            print(f"   • {err}")
     else:
-        print("❌ Задание 1 не пройдено (превышен лимит времени/памяти).")
-
-    if github_token:
-        _send_payload_to_github("task", {"task_num": 1, "passed": passed_all}, github_token, repo_owner, repo_name)
-
-def check_quiz_answers(user_answers: dict, github_token: str = None, repo_owner: str = None, repo_name: str = None):
-    """Проверка ответов викторины и отправка балла"""
-    keys = {"q1": "str", "q2": "def", "q3": "1020", "q4": "==", "q5": "4 пробела"}
-    score = sum(1 for q, ans in keys.items() if user_answers.get(q) == ans)
-    total = len(keys)
-    
-    print(f"📊 Результат теста: {score}/{total} баллов.")
-    
-    if github_token:
-        _send_payload_to_github("quiz", {"score": score, "total": total}, github_token, repo_owner, repo_name)
+        print("🎉 ВСЕ ТЕСТЫ И БЕНЧМАРКИ УСПЕШНО ПРОЙДЕНЫ!")
