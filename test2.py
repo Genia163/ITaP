@@ -84,6 +84,7 @@ def check_task1(user_func, github_token: str = None, repo_owner: str = None, rep
         ([], [], "Тест 1.4: Пустой список []"),
     ]
 
+    total = len(test_cases) + 2
     func_passed = 0
     for inp, expected, description in test_cases:
         try:
@@ -96,13 +97,12 @@ def check_task1(user_func, github_token: str = None, repo_owner: str = None, rep
         except Exception as e:
             print(f"  ⚠️ {description} — ERROR ({type(e).__name__}): {e}")
 
+    select_count = select_count + func_passed
     print(f"\n📊 Результат Этапа 1: {func_passed}/{len(test_cases)} тестов пройдено.")
 
     if func_passed < len(test_cases):
         print("\n❌ Проверка остановлена: исправьте логические ошибки в коде.")
         return
-    elif func_passed == len(test_cases):
-        select_count += 1
 
     # ------------------------------------------------------------------
     # ЭТАП 2 и 3: Стресс-тестирование (Время и Память)
@@ -194,11 +194,12 @@ def check_task1(user_func, github_token: str = None, repo_owner: str = None, rep
             print(f"   • {err}")
     else:
         print(f"🎉 ВСЕ ТЕСТЫ И БЕНЧМАРКИ УСПЕШНО ПРОЙДЕНЫ! {select_count}")
-        
+    
     if github_token:
         # Добавляем вызов отправки (передаем токены, если они доступны в вашей программе)
         # Допустим, github_token, repo_owner и repo_name передаются глобально или как аргументы
         metrics = {
+            "total": total,
             "score": select_count,
             "time_ms": round(user_time * 1000, 2),  # Новое значение: время работы
             "memory_mb": round(user_peak_mem / (1024 * 1024), 2)  # Новое значение: память
