@@ -1,10 +1,11 @@
-# task1.py
+# test.py
 import json
 import requests
 import signal
 import sys
 import time
 import tracemalloc
+
 student_info = {"name": "", "group": ""}
 
 def set_student_info(name: str, group: str):
@@ -91,7 +92,6 @@ def check_task1(user_func):
             
     print(f"\n📊 Результат Этапа 1: {func_passed}/{len(test_cases)} тестов пройдено.")
     
-    # Если логика не работает, продолжать тесты на производительность нет смысла
     if func_passed < len(test_cases):
         print("\n❌ Проверка остановлена: исправьте логические ошибки в коде.")
         return
@@ -102,13 +102,11 @@ def check_task1(user_func):
     print("\n⚡ ЭТАП 2 и 3: Анализ производительности (Время и Память)")
     print("-" * 65)
     
-    # Большой массив для выявления алгоритмической сложности O(n^2) и O(n)
     stress_data = list(range(1, 200_000))
     
-    # Настройка лимитов
-    TIMEOUT_SECONDS = 3       # Зависающий код режется через 3 секунды
-    MAX_TIME_FACTOR = 3.0     # Не медленнее эталона более чем в 3 раза
-    MAX_EXTRA_MEM_KB = 1024   # Не более 1 МБ избыточной памяти
+    TIMEOUT_SECONDS = 3
+    MAX_TIME_FACTOR = 3.0
+    MAX_EXTRA_MEM_KB = 1024
     
     # --- 1. Замер эталонной функции ---
     tracemalloc.start()
@@ -123,7 +121,6 @@ def check_task1(user_func):
     user_peak_mem = 0
     timeout_occurred = False
     
-    # Включаем таймер безопасности Linux
     signal.signal(signal.SIGALRM, _timeout_handler)
     signal.alarm(TIMEOUT_SECONDS)
     
@@ -142,7 +139,7 @@ def check_task1(user_func):
         print(f"  ⚠️ Ошибка при выполнении стресс-теста: {type(e).__name__}: {e}")
         return
     finally:
-        signal.alarm(0) # Снимаем таймер
+        signal.alarm(0)
         if tracemalloc.is_tracing():
             tracemalloc.stop()
 
@@ -153,12 +150,10 @@ def check_task1(user_func):
         print("\n❌ Задание не зачтено из-за зависания алгоритма.")
         return
         
-    # Сверяем результат стресс-теста
     if user_res != ref_res:
         print("  ❌ [ОШИБКА] Код вернул некорректный результат на большом массиве.")
         return
 
-    # Вычисляем дельты
     time_ratio = user_time / ref_time if ref_time > 0 else 1.0
     extra_memory_kb = (user_peak_mem - ref_peak_mem) / 1024
     
