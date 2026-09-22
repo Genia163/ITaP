@@ -194,6 +194,16 @@ def check_task1(user_func, github_token: str = None, repo_owner: str = None, rep
             print(f"   • {err}")
     else:
         print(f"🎉 ВСЕ ТЕСТЫ И БЕНЧМАРКИ УСПЕШНО ПРОЙДЕНЫ! {select_count}")
+        
+    if github_token:
+        # Добавляем вызов отправки (передаем токены, если они доступны в вашей программе)
+        # Допустим, github_token, repo_owner и repo_name передаются глобально или как аргументы
+        metrics = {
+            "score": select_count,
+            "time_ms": round(user_time * 1000, 2),  # Новое значение: время работы
+            "memory_mb": round(user_peak_mem / (1024 * 1024), 2)  # Новое значение: память
+        }
+        _send_payload_to_github("task1", metrics, github_token, repo_owner, repo_name)
 
 def check_quiz_answers(user_answers: dict, github_token: str = None, repo_owner: str = None, repo_name: str = None):
     """Проверка ответов викторины и отправка балла"""
@@ -205,11 +215,4 @@ def check_quiz_answers(user_answers: dict, github_token: str = None, repo_owner:
 
     if github_token:
         _send_payload_to_github("quiz", {"score": score, "total": total}, github_token, repo_owner, repo_name)
-    # Добавляем вызов отправки (передаем токены, если они доступны в вашей программе)
-    # Допустим, github_token, repo_owner и repo_name передаются глобально или как аргументы
-        metrics = {
-            "score": select_count,
-            "time_ms": round(user_time * 1000, 2),  # Новое значение: время работы
-            "memory_mb": round(user_peak_mem / (1024 * 1024), 2)  # Новое значение: память
-        }
-        _send_payload_to_github("task1", metrics, github_token, repo_owner, repo_name)
+    
