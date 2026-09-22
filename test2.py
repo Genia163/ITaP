@@ -70,6 +70,7 @@ def check_task1(user_func, github_token: str = None, repo_owner: str = None, rep
     - Замер расхода памяти (Memory Profiling)
     """
     print("🚀 Старт комплексной проверки Задания 1\n" + "=" * 65)
+    select_count = 0
     # ------------------------------------------------------------------
     # ЭТАП 1: Функциональное тестирование
     # ------------------------------------------------------------------
@@ -100,7 +101,9 @@ def check_task1(user_func, github_token: str = None, repo_owner: str = None, rep
     if func_passed < len(test_cases):
         print("\n❌ Проверка остановлена: исправьте логические ошибки в коде.")
         return
-        
+    elif func_passed == len(test_cases):
+        select_count += 1
+
     # ------------------------------------------------------------------
     # ЭТАП 2 и 3: Стресс-тестирование (Время и Память)
     # ------------------------------------------------------------------
@@ -155,10 +158,14 @@ def check_task1(user_func, github_token: str = None, repo_owner: str = None, rep
             f"     Код выполняется дольше {TIMEOUT_SECONDS} сек (вероятно, используется неоптимальный поиск/цикл O(n²)).")
         print("\n❌ Задание не зачтено из-за зависания алгоритма.")
         return
+    else:
+        select_count += 1
 
     if user_res != ref_res:
         print("  ❌ [ОШИБКА] Код вернул некорректный результат на большом массиве.")
         return
+    else:
+        select_count += 1
 
     time_ratio = user_time / ref_time if ref_time > 0 else 1.0
     extra_memory_kb = (user_peak_mem - ref_peak_mem) / 1024
@@ -186,7 +193,7 @@ def check_task1(user_func, github_token: str = None, repo_owner: str = None, rep
         for err in perf_errors:
             print(f"   • {err}")
     else:
-        print("🎉 ВСЕ ТЕСТЫ И БЕНЧМАРКИ УСПЕШНО ПРОЙДЕНЫ!")
+        print(f"🎉 ВСЕ ТЕСТЫ И БЕНЧМАРКИ УСПЕШНО ПРОЙДЕНЫ! {select_count}")
 
         # Добавляем вызов отправки (передаем токены, если они доступны в вашей программе)
         # Допустим, github_token, repo_owner и repo_name передаются глобально или как аргументы
@@ -210,3 +217,4 @@ def check_quiz_answers(user_answers: dict, github_token: str = None, repo_owner:
 
     if github_token:
         _send_payload_to_github("quiz", {"score": score, "total": total}, github_token, repo_owner, repo_name)
+
