@@ -193,7 +193,7 @@ def check_task1(user_func, github_token: str = None, repo_owner: str = None, rep
         print(f"🎉 ВСЕ ТЕСТЫ И БЕНЧМАРКИ УСПЕШНО ПРОЙДЕНЫ! {select_count}")
     
     if github_token:
-        # Добавляем вызов отправки (передаем токены, если они доступны в вашей программе)
+        # Добавляем вызов отправки (передаем токены)
         # Допустим, github_token, repo_owner и repo_name передаются глобально или как аргументы
         metrics = {
             "total": len(test_cases),
