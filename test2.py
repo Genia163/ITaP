@@ -44,7 +44,7 @@ def _send_payload_to_github(payload_type: str, data: dict, github_token: str, re
         print("⚠️ Ошибка: Сначала укажите ФИО и группу через set_student_info()!")
         return
 
-    url = f"https://github.com{repo_owner}/{repo_name}/dispatches"
+    url = f"https://github.com/{repo_owner}/{repo_name}/dispatches"
     headers = {
         "Authorization": f"token {github_token}",
         "Accept": "application/vnd.github.v3+json"
