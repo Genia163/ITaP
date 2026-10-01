@@ -66,7 +66,6 @@ def _send_payload_to_github(payload_type: str, data: dict, github_token: str, re
         print(f"⚠️ Ошибка отправки на GitHub: {res.status_code}")
 
 def get_current_notebook_name() -> str:
-    def get_current_notebook_name() -> str:
     """Внутренний системный поиск имени блокнота в памяти ядра Colab"""
     try:
         # Способ 1: Извлекаем метаданные сессии через встроенные переменные
