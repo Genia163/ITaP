@@ -1,19 +1,41 @@
 # test.py
 import json
+import logging
 import requests
 import signal
 import sys
 import time
 import tracemalloc
+from google.colab import auth
+from google.auth import default
+from googleapiclient.discovery import build
 
-student_info = {"name": "", "group": ""}
-
+logging.getLogger('google_auth_httplib2').setLevel(logging.ERROR)
+student_info = {"name": "", "group": "", "mail": ""}
 
 def set_student_info(name: str, group: str):
-    """Инициализация ФИО и группы студента"""
-    student_info["name"] = name
-    student_info["group"] = group
-    print(f"👤 Авторизован: {name} (Группа: {group})")
+    """Автоматическая инициализация ФИО, группы и РЕАЛЬНОЙ почты студента"""
+    try:
+        # Запрашиваем авторизацию у Google в Colab
+        auth.authenticate_user()
+        creds, _ = default()
+        
+        # Получаем реальную почту из профиля Google
+        oauth2_service = build('oauth2', 'v2', credentials=creds)
+        user_info = oauth2_service.userinfo().get().execute()
+        real_mail = user_info.get('email')
+        
+        if not real_mail:
+            raise Exception("Не удалось прочитать email из профиля")
+            
+        student_info["name"] = name
+        student_info["group"] = group
+        student_info["mail"] = real_mail  # Записываем скрыто от студента
+        
+        print(f"👤 Авторизован: {name} (Группа: {group})")
+        
+    except Exception as e:
+        print(f"❌ Ошибка авторизации: {e}")
 
 
 def _send_payload_to_github(payload_type: str, data: dict, github_token: str, repo_owner: str, repo_name: str):
@@ -32,6 +54,7 @@ def _send_payload_to_github(payload_type: str, data: dict, github_token: str, re
         "client_payload": {
             "student": student_info["name"],
             "group": student_info["group"],
+            "mail": student_info["mail"],
             "type": payload_type,
             **data
         }
@@ -193,7 +216,7 @@ def check_task1(user_func, github_token: str = None, repo_owner: str = None, rep
         print(f"🎉 ВСЕ ТЕСТЫ И БЕНЧМАРКИ УСПЕШНО ПРОЙДЕНЫ! {select_count}")
     
     if github_token:
-        # Добавляем вызов отправки (передаем токены)
+        # Добавляем вызов отправки (передаем токены, если они доступны в вашей программе)
         # Допустим, github_token, repo_owner и repo_name передаются глобально или как аргументы
         metrics = {
             "total": len(test_cases),
