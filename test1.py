@@ -128,8 +128,8 @@ def check_task1(user_func, github_token: str = None, repo_owner: str = None, rep
     - Замер времени работы (Benchmark)
     - Замер расхода памяти (Memory Profiling)
     """
-    if verify_notebook() == False:
-        break
+    if verify_notebook() is False:
+        return
     
     print("🚀 Старт комплексной проверки Задания 1\n" + "=" * 65)
     select_count = 0
