@@ -1,5 +1,6 @@
 # test.py
 import json
+import logging
 import requests
 import signal
 import sys
