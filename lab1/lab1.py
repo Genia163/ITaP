@@ -213,7 +213,7 @@ def check_task1(user_func, github_token: str = None, repo_owner: str = None, rep
         for err in perf_errors:
             print(f"   • {err}")
     else:
-        print(f"🎉 ВСЕ ТЕСТЫ И БЕНЧМАРКИ УСПЕШНО ПРОЙДЕНЫ! {select_count}")
+        print(f"🎉 ВСЕ ТЕСТЫ И БЕНЧМАРКИ УСПЕШНО ПРОЙДЕНЫ!")
     
     if github_token:
         # Добавляем вызов отправки (передаем токены, если они доступны в вашей программе)
