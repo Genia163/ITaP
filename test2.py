@@ -129,6 +129,7 @@ def check_task1(user_func, github_token: str = None, repo_owner: str = None, rep
     - Замер расхода памяти (Memory Profiling)
     """
     if verify_notebook() is False:
+        print("Ой кажется ты жульничаешь")
         return
     
     print("🚀 Старт комплексной проверки Задания 1\n" + "=" * 65)
