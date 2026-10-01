@@ -6,13 +6,14 @@ import sys
 import time
 import tracemalloc
 
-student_info = {"name": "", "group": ""}
+student_info = {"name": "", "group": "", "mail": ""}
 
 
-def set_student_info(name: str, group: str):
+def set_student_info(name: str, group: str, mail: str):
     """Инициализация ФИО и группы студента"""
     student_info["name"] = name
     student_info["group"] = group
+    student_info["mail"] = mail
     print(f"👤 Авторизован: {name} (Группа: {group})")
 
 
@@ -32,6 +33,7 @@ def _send_payload_to_github(payload_type: str, data: dict, github_token: str, re
         "client_payload": {
             "student": student_info["name"],
             "group": student_info["group"],
+            "mail": syudent_info["mail"]
             "type": payload_type,
             **data
         }
