@@ -29,7 +29,7 @@ def set_student_info(name: str, group: str):
     
         student_info["name"] = name
         student_info["group"] = group
-        student_info["mail"] = mail
+        student_info["mail"] = real_mail
         print(f"👤 Авторизован: {name} (Группа: {group})")
 
 def _send_payload_to_github(payload_type: str, data: dict, github_token: str, repo_owner: str, repo_name: str):
