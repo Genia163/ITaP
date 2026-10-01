@@ -13,23 +13,30 @@ student_info = {"name": "", "group": "", "mail": ""}
 
 
 def set_student_info(name: str, group: str):
-    """Инициализация ФИО и группы студента"""
-        # Запрашиваем авторизацию у Google
-    auth.authenticate_user()
-    creds, _ = default()
+    """Автоматическая инициализация ФИО, группы и РЕАЛЬНОЙ почты студента"""
+    print("Выполняется проверка Google-аккаунта...")
+    try:
+        # Запрашиваем авторизацию у Google в Colab
+        auth.authenticate_user()
+        creds, _ = default()
         
         # Получаем реальную почту из профиля Google
-    oauth2_service = build('oauth2', 'v2', credentials=creds)
-    user_info = oauth2_service.userinfo().get().execute()
-    real_mail = user_info.get('email')
+        oauth2_service = build('oauth2', 'v2', credentials=creds)
+        user_info = oauth2_service.userinfo().get().execute()
+        real_mail = user_info.get('email')
         
-    if not real_mail:
-        raise Exception("Не удалось прочитать email из профиля")
-    
-    student_info["name"] = name
-    student_info["group"] = group
-    student_info["mail"] = real_mail
-    print(f"👤 Авторизован: {name} (Группа: {group})")
+        if not real_mail:
+            raise Exception("Не удалось прочитать email из профиля")
+            
+        student_info["name"] = name
+        student_info["group"] = group
+        student_info["mail"] = real_mail  # Записываем скрыто от студента
+        
+        print(f"👤 Авторизован: {name} (Группа: {group})")
+        
+    except Exception as e:
+        print(f"❌ Ошибка авторизации: {e}")
+
 
 def _send_payload_to_github(payload_type: str, data: dict, github_token: str, repo_owner: str, repo_name: str):
     """Отправка метрик в GitHub Actions via repository_dispatch"""
