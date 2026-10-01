@@ -12,7 +12,7 @@ from googleapiclient.discovery import build
 student_info = {"name": "", "group": "", "mail": ""}
 
 
-def set_student_info(name: str, group: str, mail: str):
+def set_student_info(name: str, group: str):
     """Инициализация ФИО и группы студента"""
     try:
         # Запрашиваем авторизацию у Google
@@ -31,9 +31,6 @@ def set_student_info(name: str, group: str, mail: str):
         student_info["group"] = group
         student_info["mail"] = mail
         print(f"👤 Авторизован: {name} (Группа: {group})")
-        
-     except Exception as e:
-        print(f"❌ Ошибка авторизации: {e}")
 
 def _send_payload_to_github(payload_type: str, data: dict, github_token: str, repo_owner: str, repo_name: str):
     """Отправка метрик в GitHub Actions via repository_dispatch"""
