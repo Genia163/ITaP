@@ -9,12 +9,11 @@ from google.colab import auth
 from google.auth import default
 from googleapiclient.discovery import build
 
+logging.getLogger('google_auth_httplib2').setLevel(logging.ERROR)
 student_info = {"name": "", "group": "", "mail": ""}
-
 
 def set_student_info(name: str, group: str):
     """Автоматическая инициализация ФИО, группы и РЕАЛЬНОЙ почты студента"""
-    print("Выполняется проверка Google-аккаунта...")
     try:
         # Запрашиваем авторизацию у Google в Colab
         auth.authenticate_user()
