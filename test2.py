@@ -98,7 +98,7 @@ def verify_notebook():
     en_copies = filename_lower.count("copy")
     total_copies = ru_copies + en_copies
     
-     if total_copies > 1:
+    if total_copies > 1:
         return False
     
     return True
