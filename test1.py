@@ -66,28 +66,31 @@ def _send_payload_to_github(payload_type: str, data: dict, github_token: str, re
         print(f"⚠️ Ошибка отправки на GitHub: {res.status_code}")
 
 def get_current_notebook_name() -> str:
-    """Получает точное имя текущего файла блокнота в Google Colab"""
+    def get_current_notebook_name() -> str:
+    """Внутренний системный поиск имени блокнота в памяти ядра Colab"""
     try:
-        # Используем JS для получения метаданных блокнота из интерфейса Colab
-        js_code = 'google.colab.kernel.proxyPort(window.location.host)'
-        # Команда запрашивает имя документа через внутренний API Colab
-        name = output.eval_js("google.colab._message.ping_pong('get_nonexistent_message')")
-        
-        # Более надежный и официальный способ через внутренний RPC:
-        import requests
-        # Запрашиваем данные сессии у локального сервера Colab
-        res = requests.get('http://172.28.0').json()
-        # Извлекаем имя файла (.ipynb)
-        notebook_name = res[0]['name']
-        return notebook_name
+        # Способ 1: Извлекаем метаданные сессии через встроенные переменные
+        import sys
+        if 'google.colab' in sys.modules:
+            # Colab регистрирует сессию в пространстве имен
+            for name, val in globals().items():
+                if name == '__session__' and hasattr(val, 'get'):
+                    return val.get('name', 'unknown.ipynb')
+            
+            # Способ 2: Прямое чтение переменной окружения Jupyter сессии
+            import os
+            # В современных версиях Colab имя передается в метаданные ядра
+            if '__vsc_notebook__' in globals():
+                return globals()['__vsc_notebook__']
+                
+            # Способ 3: Поиск через инспекцию стека вызовов (где запущен .ipynb)
+            import __main__
+            if hasattr(__main__, '__file__'):
+                return os.path.basename(__main__.__file__)
     except Exception:
-        # Альтернативный быстрый метод, если первый дал сбой из-за прокси
-        try:
-            import requests
-            res = requests.get('http://172.28.0').json()
-            return res[0]['name']
-        except Exception:
-            return "unknown.ipynb"
+        pass
+        
+    return "unknown.ipynb"
 
 # --- Пример использования для защиты ---
 def verify_notebook():
