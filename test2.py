@@ -6,7 +6,7 @@ import signal
 import sys
 import time
 import tracemalloc
-from google.colab import auth
+from google.colab import auth, output
 from google.auth import default
 from googleapiclient.discovery import build
 
@@ -65,7 +65,43 @@ def _send_payload_to_github(payload_type: str, data: dict, github_token: str, re
     else:
         print(f"⚠️ Ошибка отправки на GitHub: {res.status_code}")
 
+def get_current_notebook_name() -> str:
+    """Получает точное имя текущего файла блокнота в Google Colab"""
+    try:
+        # Используем JS для получения метаданных блокнота из интерфейса Colab
+        js_code = 'google.colab.kernel.proxyPort(window.location.host)'
+        # Команда запрашивает имя документа через внутренний API Colab
+        name = output.eval_js("google.colab._message.ping_pong('get_nonexistent_message')")
+        
+        # Более надежный и официальный способ через внутренний RPC:
+        import requests
+        # Запрашиваем данные сессии у локального сервера Colab
+        res = requests.get('http://172.28.0').json()
+        # Извлекаем имя файла (.ipynb)
+        notebook_name = res[0]['name']
+        return notebook_name
+    except Exception:
+        # Альтернативный быстрый метод, если первый дал сбой из-за прокси
+        try:
+            import requests
+            res = requests.get('http://172.28.0').json()
+            return res[0]['name']
+        except Exception:
+            return "unknown.ipynb"
 
+# --- Пример использования для защиты ---
+def verify_notebook():
+    filename = get_current_notebook_name()
+    # Переводим в нижний регистр, чтобы поймать и "Копия", и "копия", и "copy"
+    filename_lower = filename.lower()
+    ru_copies = filename_lower.count("копия")
+    en_copies = filename_lower.count("copy")
+    total_copies = ru_copies + en_copies
+    
+     if total_copies > 1:
+        return False
+    
+    return True
 # ----------------------------------------------------------------------
 # 1. Эталонное решение преподавателя для сравнения производительности
 # ----------------------------------------------------------------------
@@ -92,6 +128,9 @@ def check_task1(user_func, github_token: str = None, repo_owner: str = None, rep
     - Замер времени работы (Benchmark)
     - Замер расхода памяти (Memory Profiling)
     """
+    if verify_notebook() == False:
+        break
+    
     print("🚀 Старт комплексной проверки Задания 1\n" + "=" * 65)
     select_count = 0
     # ------------------------------------------------------------------
