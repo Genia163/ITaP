@@ -33,7 +33,7 @@ def _send_payload_to_github(payload_type: str, data: dict, github_token: str, re
         "client_payload": {
             "student": student_info["name"],
             "group": student_info["group"],
-            "mail": syudent_info["mail"],
+            "mail": student_info["mail"],
             "type": payload_type,
             **data
         }
