@@ -133,6 +133,8 @@ def check_task1(user_func, github_token: str = None, repo_owner: str = None, rep
     if verify_notebook() is False:
         print("Ой кажется ты жульничаешь")
         return
+    else:
+        print("???????????????????????????????????")
     
     print("🚀 Старт комплексной проверки Задания 1\n" + "=" * 65)
     select_count = 0
