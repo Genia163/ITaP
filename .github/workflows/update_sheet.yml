@@ -77,7 +77,7 @@ jobs:
 
 
                 
-              new_value = f"Попытки удачные {socer_win} | Балл: {score}/{total} | Время: {time_ms}ms (Эталон: {ref_time}ms) | Память: {memory_mb}MB (Избыток: {extra_memory}KB)"
+              new_value = f"Попытки удачные {attempts} | Балл: {score}/{total} | Время: {time_ms}ms (Эталон: {ref_time}ms) | Память: {memory_mb}MB (Избыток: {extra_memory}KB)"
               sheet.update_cell(row_idx, col_idx, new_value)
           
           # Обработка обновления Задания 2 и 3
