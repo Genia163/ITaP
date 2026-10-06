@@ -66,14 +66,21 @@ jobs:
               attempts = 0
               if "Попытки удачные" in cell_val:
               # Если строка уже в новом формате, можно посчитать сумму удачных и неудачных
+              if "Попытки удачные" in cell_val:
               try:
-                  # Парсим "Попытки удачные X/ Попытки неудачные Y"
+                  # Безопасно парсим строку вида "Попытки удачные X/ Попытки неудачные Y | ..."
+                  # Сначала отделяем блок с попытками от остального текста
                   parts = cell_val.split("|")[0]
-                  good = int(parts.split("/")[0].replace("Попытки удачные", "").strip())
-                  bad = int(parts.split("/")[1].replace("Попытки неудачные", "").strip())
+                  # Разделяем "Попытки удачные X" и "Попытки неудачные Y"
+                  sub_parts = parts.split("/")
+                  
+                  # Извлекаем только цифры
+                  good = int(''.join(filter(str.isdigit, sub_parts[0])))
+                  bad = int(''.join(filter(str.isdigit, sub_parts[1])))
+                  
                   attempts = good + bad
               except (IndexError, ValueError):
-                    attempts = 0
+                  attempts = 0
               
               total = payload.get('total', 0)
               score = payload.get('score', 0)
