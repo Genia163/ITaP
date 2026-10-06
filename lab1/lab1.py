@@ -201,13 +201,13 @@ def check_task1(user_func, github_token: str = None, repo_owner: str = None, rep
         perf_errors.append(
             f"Код работает слишком медленно ({time_ratio:.1f}x от эталона, порог {MAX_TIME_FACTOR}x)."
         )
-        func_passed+=1
+    func_passed+=1
 
     if extra_memory_kb > MAX_EXTRA_MEM_KB:
         perf_errors.append(
             f"Выделено избыточных {extra_memory_kb:.1f} KB ОЗУ (проверьте, нет ли лишних списков/копий)."
         )
-        func_passed+=1
+    func_passed+=1
 
     print("-" * 65)
     if perf_errors:
