@@ -230,7 +230,6 @@ def check_task1(user_func, github_token: str = None, repo_owner: str = None, rep
         metrics = {
             "total": len(test_cases)+2,
             "score": func_passed,
-            "socer_win": socer_win,
             "time_ms": round(user_time * 1000, 2),  # Новое значение: время работы
             "ref_time":round(ref_time * 1000,2),
             "memory_mb":round(user_peak_mem / (1024 * 1024), 2),  # Новое значение: память
