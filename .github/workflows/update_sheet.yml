@@ -64,21 +64,9 @@ jobs:
               attempts = 0
 
               
-              if "Попытки удачные" in cell_val:
-              try:
-                  # 1. Отделяем блок с попытками от остального текста (берем элемент до первой '|')
-                  attempts_part = cell_val.split("|")[0]
-                  
-                  # 2. Разделяем на "Попытки удачные X" и " Попытки неудачные Y"
-                  sub_parts = attempts_part.split("/")
-                  
-                  # 3. Извлекаем только цифры из каждой части
-                  good = int(''.join(filter(str.isdigit, sub_parts[0])))
-                  bad = int(''.join(filter(str.isdigit, sub_parts[1])))
-                  
-                  attempts = good + bad
-              except (IndexError, ValueError):
-                  attempts = 0
+              if "Попыток:" in cell_val:
+                  attempts = int(cell_val.split("|")[0].replace("Попыток:", "").strip())
+              attempts += 1
               
               total = payload.get('total', 0)
               score = payload.get('score', 0)
