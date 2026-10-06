@@ -79,9 +79,9 @@ jobs:
               memory_mb = payload.get('memory_mb', 0.0)
               extra_memory = payload.get('extra_memory', 0.0)
               
-              #unlack = attempts - socer_win
-              #if unlack < 0:
-              #    unlack = 0
+              unlack = attempts - socer_win
+              if unlack < 0:
+                  unlack = 0
                 
               new_value = f"Попытки удачные: {socer_win} / Попытки неудачные: {socer_win} | Балл: {score}/{total} | Время: {time_ms}ms (Эталон: {ref_time}ms) | Память: {memory_mb}MB (Избыток: {extra_memory}KB)"
               sheet.update_cell(row_idx, col_idx, new_value)
