@@ -28,7 +28,7 @@ jobs:
           python - << 'EOF'
           import os, json, gspread
           from oauth2client.service_account import ServiceAccountCredentials
-
+          socer_win = 0
           # Авторизация в Google API
           scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
           key_dict = json.loads(os.environ['GCP_SA_KEY'])
@@ -77,7 +77,9 @@ jobs:
               ref_time = payload.get('ref_time', 0.0)
               memory_mb = payload.get('memory_mb', 0.0)
               extra_memory = payload.get('extra_memory', 0.0)
-              socer_win = payload.get('socer_win', 0)
+
+              if score == total:
+                  socer_win = 1
               
               unlack = attempts - socer_win
               if unlack < 0:
