@@ -73,7 +73,7 @@ jobs:
               
               total = payload.get('total', 0)
               score = payload.get('score', 0)
-              socer_win = payload.get('socer_win', 0)
+              #socer_win = payload.get('socer_win', 0)
               time_ms = payload.get('time_ms', 0.0)
               ref_time = payload.get('ref_time', 0.0)
               memory_mb = payload.get('memory_mb', 0.0)
