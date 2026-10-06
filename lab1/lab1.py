@@ -201,11 +201,13 @@ def check_task1(user_func, github_token: str = None, repo_owner: str = None, rep
         perf_errors.append(
             f"Код работает слишком медленно ({time_ratio:.1f}x от эталона, порог {MAX_TIME_FACTOR}x)."
         )
+        fun_passed+=1
 
     if extra_memory_kb > MAX_EXTRA_MEM_KB:
         perf_errors.append(
             f"Выделено избыточных {extra_memory_kb:.1f} KB ОЗУ (проверьте, нет ли лишних списков/копий)."
         )
+        fun_passed+=1
 
     print("-" * 65)
     if perf_errors:
@@ -219,7 +221,7 @@ def check_task1(user_func, github_token: str = None, repo_owner: str = None, rep
         # Добавляем вызов отправки (передаем токены, если они доступны в вашей программе)
         # Допустим, github_token, repo_owner и repo_name передаются глобально или как аргументы
         metrics = {
-            "total": len(test_cases),
+            "total": len(test_cases)+2,
             "score": func_passed,
             "time_ms": round(user_time * 1000, 2),  # Новое значение: время работы
             "ref_time":round(ref_time * 1000,2),
