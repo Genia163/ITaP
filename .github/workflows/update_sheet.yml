@@ -64,7 +64,7 @@ jobs:
               attempts = 0
 
               
-              if "Попытки удачные:" in cell_val or Попытки неудачные: in cell_val:
+              if "Попытки удачные:" in cell_val or "Попытки неудачные:" in cell_val:
                   under = cell_val.split("|")[0]
                   attempts_luck = int(under.split("/")[0].replace("Попытки удачные:", "").strip())
                   attempts_bad = int(under.split("/")[1].replace("Попытки неудачные:", "").strip())
