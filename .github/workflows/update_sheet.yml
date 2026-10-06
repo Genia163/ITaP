@@ -60,7 +60,7 @@ jobs:
           # Обработка обновления Задания 1 (D = Колонка 4)
           if req_type == "task1":
               col_idx = 4 # Колонка D
-              cell_val = sheet.cell(row_idx, col_idx).value or ''
+              cell_val = sheet.cell(row_idx, col_idx).value
               attempts = 0
 
               
