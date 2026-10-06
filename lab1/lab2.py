@@ -237,7 +237,7 @@ def check_task1(user_func, github_token: str = None, repo_owner: str = None, rep
             "extra_memory":round(extra_memory_kb,2)
         }
         _send_payload_to_github("task1", metrics, github_token, repo_owner, repo_name)
-        print(f"socer_win: {socer_win})
+        print(f"socer_win: {socer_win}")
 def check_quiz_answers(user_answers: dict, github_token: str = None, repo_owner: str = None, repo_name: str = None):
     """Проверка ответов викторины и отправка балла"""
     keys = {"q1": "str", "q2": "def", "q3": "1020", "q4": "==", "q5": "4 пробела"}
