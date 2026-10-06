@@ -79,7 +79,7 @@ jobs:
               extra_memory = payload.get('extra_memory', 0.0)
 
               if score == total:
-                  socer_win = 1
+                  socer_win += 1
               
               unlack = attempts - socer_win
               if unlack < 0:
