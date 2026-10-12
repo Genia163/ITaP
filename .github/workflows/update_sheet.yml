@@ -137,7 +137,10 @@ jobs:
             cell_val = sheet.cell(row_idx, col_idx).value or "Попыток: 0 | Балл: 0/0"
             attempts = 0
             if "Попыток:" in cell_val:
-                attempts = int(cell_val.split("|")[0].replace("Попыток:", "").strip())
+                try:
+                    attempts = int(cell_val.split("|")[0].replace("Попыток:", "").strip())
+                except Exception:
+                    pass
             attempts += 1
             score_str = f"{payload['score']}/{payload['total']}"
             sheet.update_cell(row_idx, col_idx, f"Попыток: {attempts} | Балл: {score_str}")
