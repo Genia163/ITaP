@@ -256,7 +256,7 @@ def check_quiz_answers(user_answers: dict, github_token: str = None, repo_owner:
     if github_token:
         lab_date = {
             "repo_type": "quiz",
-            "lab_num": 1,      # <-- Указываем номер ЛР (создаст и откроет лист ПЗ2)
+            "lab_num": 2,      # <-- Указываем номер ЛР (создаст и откроет лист ПЗ2)
             "task_num": 0 
         }
         _send_payload_to_github(lab_date, {"score": score, "total": total}, github_token, repo_owner, repo_name)
