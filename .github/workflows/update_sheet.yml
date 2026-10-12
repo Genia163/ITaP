@@ -63,7 +63,7 @@ jobs:
         if sheet_is_new_or_empty:
             sheet.append_row([student, group, mail, "", "", "", ""])
             row_idx = 2
-         if row_idx is None:
+        if row_idx is None:
             records = sheet.get_all_values()
         
         # Поиск строки студента (колонки: A - Студент, B - Группа, C - Почта)
