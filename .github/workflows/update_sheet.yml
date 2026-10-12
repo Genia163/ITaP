@@ -47,28 +47,41 @@ jobs:
         sheet_num = f"ПЗ{lab_num}"
         header = ["Студент", "Группа", "Почта", "Задание 1", "Задание 2", "Задание 3", "Тестирование"]
         row_idx = None
+        sheet_is_new_or_empty = False
         try:
             sheet = spreadsheet.worksheet(sheet_num)
+            first_row = sheet.row_values(1)
+            if not first_row or all(val.strip() == "" for val in first_row):
+                sheet.append_row(header)
+                sheet_is_new_or_empty = True
         except gspread.exceptions.WorksheetNotFound:
+            # Если листа нет вообще — создаем и заполняем
             sheet = spreadsheet.add_worksheet(title=sheet_num, rows="100", cols="20")
             sheet.append_row(header)
+            sheet_is_new_or_empty = True
+
+        if sheet_is_new_or_empty:
             sheet.append_row([student, group, mail, "", "", "", ""])
             row_idx = 2
-
+         if row_idx is None:
+            records = sheet.get_all_values()
         
         # Поиск строки студента (колонки: A - Студент, B - Группа, C - Почта)
-        if row_idx is None:
-            records = sheet.get_all_values()
-            for i, row in enumerate(records[1:], start=2):
-                if len(row) >= 3:
-                    r_student = str(row[0]).strip()
-                    r_group = str(row[1]).strip()
-                    r_mail = str(row[2]).strip()
-                    
-                    if (r_student == student and r_group == group) or (mail and r_mail == mail):
-                        row_idx = i
-                        break
-
+            if len(records) <= 1:
+                sheet.append_row([student, group, mail, "", "", "", ""])
+                row_idx = len(sheet.get_all_values())
+            else:
+                # Ищем студента среди существующих записей
+                for i, row in enumerate(records[1:], start=2):
+                    if len(row) >= 3:
+                        r_student = str(row[0]).strip()
+                        r_group = str(row[1]).strip()
+                        r_mail = str(row[2]).strip()
+                        
+                        if (r_student == student and r_group == group) or (mail and r_mail == mail):
+                            row_idx = i
+                            break
+                            
             # Если лист существовал, но этого конкретного студента на нем еще не было
             if not row_idx:
                 sheet.append_row([student, group, mail, "", "", "", ""])
