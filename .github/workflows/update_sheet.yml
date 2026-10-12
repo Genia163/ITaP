@@ -49,7 +49,7 @@ jobs:
         try:
             sheet = spreadsheet.worksheet(sheet_num)
         except gspread.exceptions.WorksheetNotFound:
-            sheet = spreadsheet.add_worksheet(title=sheet_name, rows="100", cols="20")
+            sheet = spreadsheet.add_worksheet(title=sheet_num, rows="100", cols="20")
             sheet.append_row(header)
 
         # Поиск строки студента (колонки: A - Студент, B - Группа, C - Почта)
