@@ -37,7 +37,7 @@ jobs:
         student = payload['student']
         group = payload['group']
         mail = payload.get('mail', '')
-        lab = payload['lab']
+        lab = payload['type']
 
         req_type = lab["repo_type"]
         lab_num = lab["lab_num"] 
