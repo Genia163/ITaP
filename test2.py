@@ -238,7 +238,7 @@ def check_task1(user_func, github_token: str = None, repo_owner: str = None, rep
         }
         lab_date = {
             "repo_type": "task",
-            "lab_num": 2,      # <-- Указываем номер ЛР (создаст и откроет лист ПЗ2)
+            "lab_num": 3,      # <-- Указываем номер ЛР (создаст и откроет лист ПЗ2)
             "task_num": 1       # <-- Указываем номер задания (запишет в Колонку 4 / Задание 1)
         }
 
