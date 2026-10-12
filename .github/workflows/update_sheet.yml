@@ -82,10 +82,10 @@ jobs:
                             row_idx = i
                             break
                             
-            # Если лист существовал, но этого конкретного студента на нем еще не было
-            if not row_idx:
-                sheet.append_row([student, group, mail, "", "", "", ""])
-                row_idx = len(sheet.get_all_values())
+                # Если лист существовал, но этого конкретного студента на нем еще не было
+                if not row_idx:
+                    sheet.append_row([student, group, mail, "", "", "", ""])
+                    row_idx = len(sheet.get_all_values())
             
         # Обработка обновления Задания 1 (D = Колонка 4)
         if req_type == "task" and task_num == 1:
