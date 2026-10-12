@@ -46,26 +46,33 @@ jobs:
         
         sheet_num = f"ПЗ{lab_num}"
         header = ["Студент", "Группа", "Почта", "Задание 1", "Задание 2", "Задание 3", "Тестирование"]
-        
+        row_idx = None
         try:
             sheet = spreadsheet.worksheet(sheet_num)
         except gspread.exceptions.WorksheetNotFound:
             sheet = spreadsheet.add_worksheet(title=sheet_num, rows="100", cols="20")
             sheet.append_row(header)
-
-        # Поиск строки студента (колонки: A - Студент, B - Группа, C - Почта)
-        records = sheet.get_all_values()
-        row_idx = None
-        for i, row in enumerate(records[1:], start=2):
-            if len(row) >= 3 and ((row[0] == student and row[1] == group) or row[2] == mail):
-                row_idx = i
-                break
-
-        # Если студента нет на этом листе — создаем новую строку
-        if not row_idx:
             sheet.append_row([student, group, mail, "", "", "", ""])
-            row_idx = len(sheet.get_all_values())
+            row_idx = 2
 
+        
+        # Поиск строки студента (колонки: A - Студент, B - Группа, C - Почта)
+        if row_idx is None:
+            records = sheet.get_all_values()
+            for i, row in enumerate(records[1:], start=2):
+                if len(row) >= 3:
+                    r_student = str(row[0]).strip()
+                    r_group = str(row[1]).strip()
+                    r_mail = str(row[2]).strip()
+                    
+                    if (r_student == student and r_group == group) or (mail and r_mail == mail):
+                        row_idx = i
+                        break
+
+            # Если лист существовал, но этого конкретного студента на нем еще не было
+            if not row_idx:
+                sheet.append_row([student, group, mail, "", "", "", ""])
+                row_idx = len(sheet.get_all_values())
             
         # Обработка обновления Задания 1 (D = Колонка 4)
         if req_type == "task" and task_num == 1:
