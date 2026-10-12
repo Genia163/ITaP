@@ -38,7 +38,7 @@ def set_student_info(name: str, group: str):
         print(f"❌ Ошибка авторизации: {e}")
 
 
-def _send_payload_to_github(payload_type: dict, data: dict, github_token: str, repo_owner: str, repo_name: str):
+def _send_payload_to_github(lab_date: dict, data: dict, github_token: str, repo_owner: str, repo_name: str):
     """Отправка метрик в GitHub Actions via repository_dispatch"""
     if not student_info["name"]:
         print("⚠️ Ошибка: Сначала укажите ФИО и группу через set_student_info()!")
