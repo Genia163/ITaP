@@ -43,7 +43,8 @@ def _send_payload_to_github(payload_type: str, data: dict, github_token: str, re
     if not student_info["name"]:
         print("⚠️ Ошибка: Сначала укажите ФИО и группу через set_student_info()!")
         return
-
+        
+    lab = {"lab_num":payload_type[4],"task_num":payload_type[5]}
     url = f"https://api.github.com/repos/{repo_owner}/{repo_name}/dispatches"
     headers = {
         "Authorization": f"token {github_token}",
@@ -56,6 +57,7 @@ def _send_payload_to_github(payload_type: str, data: dict, github_token: str, re
             "group": student_info["group"],
             "mail": student_info["mail"],
             "type": payload_type,
+            "lab": lab, 
             **data
         }
     }
