@@ -6,7 +6,7 @@ import signal
 import sys
 import time
 import tracemalloc
-from google.colab import auth, output
+from google.colab import auth
 from google.auth import default
 from googleapiclient.discovery import build
 
@@ -43,7 +43,8 @@ def _send_payload_to_github(payload_type: str, data: dict, github_token: str, re
     if not student_info["name"]:
         print("⚠️ Ошибка: Сначала укажите ФИО и группу через set_student_info()!")
         return
-
+        
+    lab = {"lab_num":payload_type[4],"task_num":payload_type[5]}
     url = f"https://api.github.com/repos/{repo_owner}/{repo_name}/dispatches"
     headers = {
         "Authorization": f"token {github_token}",
@@ -56,6 +57,7 @@ def _send_payload_to_github(payload_type: str, data: dict, github_token: str, re
             "group": student_info["group"],
             "mail": student_info["mail"],
             "type": payload_type,
+            "lab": lab, 
             **data
         }
     }
@@ -65,45 +67,7 @@ def _send_payload_to_github(payload_type: str, data: dict, github_token: str, re
     else:
         print(f"⚠️ Ошибка отправки на GitHub: {res.status_code}")
 
-def get_current_notebook_name() -> str:
-    """Внутренний системный поиск имени блокнота в памяти ядра Colab"""
-    try:
-        # Способ 1: Извлекаем метаданные сессии через встроенные переменные
-        import sys
-        if 'google.colab' in sys.modules:
-            # Colab регистрирует сессию в пространстве имен
-            for name, val in globals().items():
-                if name == '__session__' and hasattr(val, 'get'):
-                    return val.get('name', 'unknown.ipynb')
-            
-            # Способ 2: Прямое чтение переменной окружения Jupyter сессии
-            import os
-            # В современных версиях Colab имя передается в метаданные ядра
-            if '__vsc_notebook__' in globals():
-                return globals()['__vsc_notebook__']
-                
-            # Способ 3: Поиск через инспекцию стека вызовов (где запущен .ipynb)
-            import __main__
-            if hasattr(__main__, '__file__'):
-                return os.path.basename(__main__.__file__)
-    except Exception:
-        pass
-        
-    return "unknown.ipynb"
 
-# --- Пример использования для защиты ---
-def verify_notebook():
-    filename = get_current_notebook_name()
-    # Переводим в нижний регистр, чтобы поймать и "Копия", и "копия", и "copy"
-    filename_lower = filename.lower()
-    ru_copies = filename_lower.count("копия")
-    en_copies = filename_lower.count("copy")
-    total_copies = ru_copies + en_copies
-    
-    if total_copies > 1:
-        return False
-    
-    return True
 # ----------------------------------------------------------------------
 # 1. Эталонное решение преподавателя для сравнения производительности
 # ----------------------------------------------------------------------
@@ -130,12 +94,6 @@ def check_task1(user_func, github_token: str = None, repo_owner: str = None, rep
     - Замер времени работы (Benchmark)
     - Замер расхода памяти (Memory Profiling)
     """
-    if verify_notebook() is False:
-        print("Ой кажется ты жульничаешь")
-        return
-    else:
-        print("???????????????????????????????????")
-    
     print("🚀 Старт комплексной проверки Задания 1\n" + "=" * 65)
     select_count = 0
     # ------------------------------------------------------------------
@@ -245,11 +203,15 @@ def check_task1(user_func, github_token: str = None, repo_owner: str = None, rep
         perf_errors.append(
             f"Код работает слишком медленно ({time_ratio:.1f}x от эталона, порог {MAX_TIME_FACTOR}x)."
         )
+    else:
+        func_passed+=1
 
     if extra_memory_kb > MAX_EXTRA_MEM_KB:
         perf_errors.append(
             f"Выделено избыточных {extra_memory_kb:.1f} KB ОЗУ (проверьте, нет ли лишних списков/копий)."
         )
+    else:
+        func_passed+=1
 
     print("-" * 65)
     if perf_errors:
@@ -257,20 +219,25 @@ def check_task1(user_func, github_token: str = None, repo_owner: str = None, rep
         for err in perf_errors:
             print(f"   • {err}")
     else:
-        print(f"🎉 ВСЕ ТЕСТЫ И БЕНЧМАРКИ УСПЕШНО ПРОЙДЕНЫ! {select_count}")
+        print(f"🎉 ВСЕ ТЕСТЫ И БЕНЧМАРКИ УСПЕШНО ПРОЙДЕНЫ!")
+    
+    socer_win = 0
+    if func_passed == (len(test_cases)+2):
+        socer_win += 1
+
     
     if github_token:
         # Добавляем вызов отправки (передаем токены, если они доступны в вашей программе)
         # Допустим, github_token, repo_owner и repo_name передаются глобально или как аргументы
         metrics = {
-            "total": len(test_cases),
+            "total": len(test_cases)+2,
             "score": func_passed,
             "time_ms": round(user_time * 1000, 2),  # Новое значение: время работы
             "ref_time":round(ref_time * 1000,2),
             "memory_mb":round(user_peak_mem / (1024 * 1024), 2),  # Новое значение: память
             "extra_memory":round(extra_memory_kb,2)
         }
-        _send_payload_to_github("task1", metrics, github_token, repo_owner, repo_name)
+        _send_payload_to_github("task21", metrics, github_token, repo_owner, repo_name)
 
 def check_quiz_answers(user_answers: dict, github_token: str = None, repo_owner: str = None, repo_name: str = None):
     """Проверка ответов викторины и отправка балла"""
@@ -282,4 +249,5 @@ def check_quiz_answers(user_answers: dict, github_token: str = None, repo_owner:
 
     if github_token:
         _send_payload_to_github("quiz", {"score": score, "total": total}, github_token, repo_owner, repo_name)
+        
     
