@@ -40,9 +40,9 @@ jobs:
         
         # Безопасно разбираем вложенный словарь payload['type']
         lab = payload.get('type', {})
-        req_type = lab.get("repo_type", "task")
-        lab_num = lab.get("lab_num", 1) 
-        task_num = lab.get("task_num", 1)
+        req_type = str(lab.get("repo_type", "task")).strip()
+        lab_num = int(lab.get("lab_num", 1)) 
+        task_num = int(lab.get("task_num", 1))
         
         sheet_num = f"ПЗ{lab_num}"
         header = ["Студент", "Группа", "Почта", "Задание 1", "Задание 2", "Задание 3", "Тестирование"]
@@ -66,21 +66,22 @@ jobs:
             sheet.append_row([student, group, mail, "", "", "", ""])
             row_idx = len(sheet.get_all_values())
 
+            
         # Обработка обновления Задания 1 (D = Колонка 4)
-        if req_type.startswith("task") and task_num == 1:
+        if req_type == "task" and task_num == 1:
             col_idx = 4
             cell_val = sheet.cell(row_idx, col_idx).value or ""
             attempts_luck = 0
             attempts_bad = 0
-            if "|" in cell_val and "/" in cell_val:
-                try:
-                    under = cell_val.split("|")[0]
-                    attempts_luck = int(under.split("/")[0].replace("Попытки удачные:", "").strip())
-                    attempts_bad = int(under.split("/")[1].replace("Попытки неудачные:", "").strip())
-                except Exception:
-                    pass
             
-            attempts = attempts_luck + attempts_bad + 1
+            if "Попытки удачные:" in cell_val or "Попытки неудачные:" in cell_val:
+                under = cell_val.split("|")[0]
+                attempts_luck = int(under.split("/")[0].replace("Попытки удачные:", "").strip())
+                attempts_bad = int(under.split("/")[1].replace("Попытки неудачные:", "").strip())
+                attempts = attempts_luck + attempts_bad
+            attempts += 1
+
+            
             total = payload.get('total', 0)
             score = payload.get('score', 0)
             time_ms = payload.get('time_ms', 0.0)
@@ -98,7 +99,7 @@ jobs:
             sheet.update_cell(row_idx, col_idx, new_value)
 
         # Обработка обновления Задания 2 и 3 (Колонки E=5, F=6)
-        elif req_type.startswith("task") and task_num == 2:
+        elif req_type == "task" and task_num == 2:
             col_map = {1: 4, 2: 5, 3: 6}
             col_idx = col_map.get(payload['task_num'], 4)
             cell_val = sheet.cell(row_idx, col_idx).value or "Попыток: 0 | Зачтено: Нет"
