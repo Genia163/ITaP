@@ -43,8 +43,7 @@ def _send_payload_to_github(payload_type: str, data: dict, github_token: str, re
     if not student_info["name"]:
         print("⚠️ Ошибка: Сначала укажите ФИО и группу через set_student_info()!")
         return
-        
-    lab = {"lab_num":payload_type[4],"task_num":payload_type[5]}
+
     url = f"https://api.github.com/repos/{repo_owner}/{repo_name}/dispatches"
     headers = {
         "Authorization": f"token {github_token}",
@@ -57,7 +56,6 @@ def _send_payload_to_github(payload_type: str, data: dict, github_token: str, re
             "group": student_info["group"],
             "mail": student_info["mail"],
             "type": payload_type,
-            "lab": lab, 
             **data
         }
     }
@@ -237,8 +235,8 @@ def check_task1(user_func, github_token: str = None, repo_owner: str = None, rep
             "memory_mb":round(user_peak_mem / (1024 * 1024), 2),  # Новое значение: память
             "extra_memory":round(extra_memory_kb,2)
         }
-        _send_payload_to_github("task21", metrics, github_token, repo_owner, repo_name)
-
+        _send_payload_to_github("task1", metrics, github_token, repo_owner, repo_name)
+        print(f"socer_win: {socer_win}")
 def check_quiz_answers(user_answers: dict, github_token: str = None, repo_owner: str = None, repo_name: str = None):
     """Проверка ответов викторины и отправка балла"""
     keys = {"q1": "str", "q2": "def", "q3": "1020", "q4": "==", "q5": "4 пробела"}
@@ -249,5 +247,4 @@ def check_quiz_answers(user_answers: dict, github_token: str = None, repo_owner:
 
     if github_token:
         _send_payload_to_github("quiz", {"score": score, "total": total}, github_token, repo_owner, repo_name)
-        
     
