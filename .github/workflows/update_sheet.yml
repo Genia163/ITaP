@@ -71,6 +71,7 @@ jobs:
         if req_type == "task" and task_num == 1:
             col_idx = 4
             cell_val = sheet.cell(row_idx, col_idx).value or ""
+            attempts = 0
             attempts_luck = 0
             attempts_bad = 0
             
