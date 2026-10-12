@@ -37,11 +37,12 @@ jobs:
         student = payload['student']
         group = payload['group']
         mail = payload.get('mail', '')
-        lab = payload['type']
-
-        req_type = lab["repo_type"]
-        lab_num = lab["lab_num"] 
-        task_num = lab["task_num"]
+        
+        # Безопасно разбираем вложенный словарь payload['type']
+        lab = payload.get('type', {})
+        req_type = lab.get("repo_type", "task")
+        lab_num = lab.get("lab_num", 1) 
+        task_num = lab.get("task_num", 1)
         
         sheet_num = f"ПЗ{lab_num}"
         header = ["Студент", "Группа", "Почта", "Задание 1", "Задание 2", "Задание 3", "Тестирование"]
@@ -71,10 +72,13 @@ jobs:
             cell_val = sheet.cell(row_idx, col_idx).value or ""
             attempts_luck = 0
             attempts_bad = 0
-            if "Попытки удачные:" in cell_val or "Попытки неудачные:" in cell_val:
-                under = cell_val.split("|")[0]
-                attempts_luck = int(under.split("/")[0].replace("Попытки удачные:", "").strip())
-                attempts_bad = int(under.split("/")[1].replace("Попытки неудачные:", "").strip())
+            if "|" in cell_val and "/" in cell_val:
+                try:
+                    under = cell_val.split("|")[0]
+                    attempts_luck = int(under.split("/")[0].replace("Попытки удачные:", "").strip())
+                    attempts_bad = int(under.split("/")[1].replace("Попытки неудачные:", "").strip())
+                except Exception:
+                    pass
             
             attempts = attempts_luck + attempts_bad + 1
             total = payload.get('total', 0)
@@ -107,7 +111,7 @@ jobs:
 
         # Обработка обновления Тестирования (уже на втором листе, например, в колонку D=4)
         elif req_type == "quiz":
-            col_idx = 4  # На втором листе под результаты тестов можно выделить колонку D
+            col_idx = 7  # На втором листе под результаты тестов можно выделить колонку D
             cell_val = sheet.cell(row_idx, col_idx).value or "Попыток: 0 | Балл: 0/0"
             attempts = 0
             if "Попыток:" in cell_val:
