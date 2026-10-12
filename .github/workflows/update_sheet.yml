@@ -39,7 +39,8 @@ jobs:
         mail = payload.get('mail', '')
         req_type = payload['type']
         lab = payload['lab']
-        
+
+        req_type = lab["repo_type"]
         lab_num = lab["lab_num"] 
         task_num = lab["task_num"]
         
