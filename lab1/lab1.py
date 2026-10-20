@@ -260,5 +260,5 @@ def check_task1(user_func, github_token: str = None, repo_owner: str = None, rep
         _send_payload_to_github(lab_date, metrics, github_token, repo_owner, repo_name)
 
 def check_quiz(user_answers: dict, github_token: str = None, repo_owner: str = None, repo_name: str = None, task_num: int = None, lab_num: int = None):
-    checcheck_quiz.check_quiz_answers(user_answers, github_token, repo_owner, repo_name, task_num, lab_num)
+    _send_payload_to_github(checcheck_quiz.check_quiz_answers(user_answers, github_token, repo_owner, repo_name, task_num, lab_num))
     
