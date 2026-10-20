@@ -113,6 +113,7 @@ def _timeout_handler(signum, frame):
 # Основная функция проверки
 # ----------------------------------------------------------------------
 def check_task(user_func, github_token: str = None, repo_owner: str = None, repo_name: str = None, lab_num: int= None, task_num: int = None):
+    print("12121")
     """
     Комплексная проверка Задания 1:
     - Функциональные тесты на корректность вычислений
