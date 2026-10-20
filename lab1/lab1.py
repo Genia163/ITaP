@@ -16,7 +16,7 @@ def _load_remote_(name, url):
     exec(code,mod.__dict__)
     return mod
 checcheck_quiz=_load_remote_(
-    "checcheck_quiz", "https://raw.githubusercontent.com/Genia163/ITaP/refs/heads/main/lab1/checcheck_quiz.py"
+    "checcheck_quiz", "https://raw.githubusercontent.com/Genia163/ITaP/refs/heads/main/checcheck_quiz.py"
 )
 
 logging.getLogger('google_auth_httplib2').setLevel(logging.ERROR)
