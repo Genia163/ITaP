@@ -9,7 +9,7 @@ import tracemalloc
 from google.colab import auth
 from google.auth import default
 from googleapiclient.discovery import build
-import checcheck_quiz
+from lab1 import checcheck_quiz
 
 logging.getLogger('google_auth_httplib2').setLevel(logging.ERROR)
 student_info = {"name": "", "group": "", "mail": ""}
