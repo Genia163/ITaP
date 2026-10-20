@@ -20,7 +20,9 @@ def check_quiz_answers(user_answers: dict, github_token: str = None, repo_owner:
             "task_num": task_num 
         }
         return(lab_date, {"score": score, "total": total}, github_token, repo_owner, repo_name)
-
+         
+    else:
+        print(" ⚠️  Не указан гит токен")
 
 if __name__ == "__main__":
      check_quiz_answers()
