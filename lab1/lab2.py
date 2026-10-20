@@ -12,6 +12,22 @@ from googleapiclient.discovery import build
 
 logging.getLogger('google_auth_httplib2').setLevel(logging.ERROR)
 student_info = {"name": "", "group": "", "mail": ""}
+all_cases = [
+    [
+        ([1, 2, 3, 4, 5, 6], [4, 16, 36], "Тест 1.1: Базовый список [1, 2, 3, 4, 5, 6]"),
+        ([1, 3, 5], [], "Тест 1.2: Список без чётных чисел [1, 3, 5]"),
+        ([-4, -3, 0, 2], [16, 0, 4], "Тест 1.3: Отрицательные числа и ноль [-4, -3, 0, 2]"),
+        ([], [], "Тест 1.4: Пустой список []"),
+        3, 3.0, 1024
+    ],  
+    [  
+        ([1, 2, 3, 4, 5, 6], [4, 16, 36], "345243535"),
+        ([1, 3, 5], [], "456w4576"),
+        ([-4, -3, 0, 2], [16, 0, 4], "231435346456"),
+        ([], [], "12112121212"),
+        3, 3.0, 1024
+    ]
+]
 
 def set_student_info(name: str, group: str):
     """Автоматическая инициализация ФИО, группы и РЕАЛЬНОЙ почты студента"""
@@ -86,7 +102,7 @@ def _timeout_handler(signum, frame):
 # ----------------------------------------------------------------------
 # Основная функция проверки
 # ----------------------------------------------------------------------
-def check_task1(user_func, github_token: str = None, repo_owner: str = None, repo_name: str = None):
+def check_task1(user_func, github_token: str = None, repo_owner: str = None, repo_name: str = None, lab_num: int= None, task_num: int = None):
     """
     Комплексная проверка Задания 1:
     - Функциональные тесты на корректность вычислений
@@ -94,21 +110,16 @@ def check_task1(user_func, github_token: str = None, repo_owner: str = None, rep
     - Замер расхода памяти (Memory Profiling)
     """
     print("🚀 Старт комплексной проверки Задания 1\n" + "=" * 65)
-    select_count = 0
+   
     # ------------------------------------------------------------------
     # ЭТАП 1: Функциональное тестирование
     # ------------------------------------------------------------------
     print("📋 ЭТАП 1: Проверка корректности работы (Функциональные тесты)")
     print("-" * 65)
 
-    test_cases = [
-        ([1, 2, 3, 4, 5, 6], [4, 16, 36], "Тест 1.1: Базовый список [1, 2, 3, 4, 5, 6]"),
-        ([1, 3, 5], [], "Тест 1.2: Список без чётных чисел [1, 3, 5]"),
-        ([-4, -3, 0, 2], [16, 0, 4], "Тест 1.3: Отрицательные числа и ноль [-4, -3, 0, 2]"),
-        ([], [], "Тест 1.4: Пустой список []"),
-    ]
-
-    
+    test_metric = all_cases[task_num-1] 
+    test_cases = test_metric[:-3]
+    select_count = 0
     func_passed = 0
     for inp, expected, description in test_cases:
         try:
@@ -135,9 +146,9 @@ def check_task1(user_func, github_token: str = None, repo_owner: str = None, rep
 
     stress_data = list(range(1, 200_000))
 
-    TIMEOUT_SECONDS = 3
-    MAX_TIME_FACTOR = 3.0
-    MAX_EXTRA_MEM_KB = 1024
+    TIMEOUT_SECONDS =test_metric[-3]
+    MAX_TIME_FACTOR = test_metric[-2]
+    MAX_EXTRA_MEM_KB = test_metric[-1]
 
     # --- 1. Замер эталонной функции ---
     tracemalloc.start()
@@ -238,8 +249,8 @@ def check_task1(user_func, github_token: str = None, repo_owner: str = None, rep
         }
         lab_date = {
             "repo_type": "task",
-            "lab_num": 2,      # <-- Указываем номер ЛР (создаст и откроет лист ПЗ2)
-            "task_num": 1       # <-- Указываем номер задания (запишет в Колонку 4 / Задание 1)
+            "lab_num": lab_num,      # <-- Указываем номер ЛР (создаст и откроет лист ПЗ2)
+            "task_num": task_num       # <-- Указываем номер задания (запишет в Колонку 4 / Задание 1)
         }
 
         
