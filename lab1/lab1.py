@@ -70,8 +70,7 @@ def _send_payload_to_github(lab_date: dict, data: dict, github_token: str, repo_
     if not student_info["name"]:
         print("⚠️ Ошибка: Сначала укажите ФИО и группу через set_student_info()!")
         return
-        
-   
+
     url = f"https://api.github.com/repos/{repo_owner}/{repo_name}/dispatches"
     headers = {
         "Authorization": f"token {github_token}",
@@ -113,7 +112,7 @@ def _timeout_handler(signum, frame):
 # ----------------------------------------------------------------------
 # Основная функция проверки
 # ----------------------------------------------------------------------
-def check_task1(user_func, github_token: str = None, repo_owner: str = None, repo_name: str = None, lab_num: int= None, task_num: int = None):
+def check_task(user_func, github_token: str = None, repo_owner: str = None, repo_name: str = None, lab_num: int= None, task_num: int = None):
     """
     Комплексная проверка Задания 1:
     - Функциональные тесты на корректность вычислений
@@ -263,7 +262,8 @@ def check_task1(user_func, github_token: str = None, repo_owner: str = None, rep
             "lab_num": lab_num,      # <-- Указываем номер ЛР (создаст и откроет лист ПЗ2)
             "task_num": task_num       # <-- Указываем номер задания (запишет в Колонку 4 / Задание 1)
         }
-
+    else:
+        print(" ⚠️  Не указан гит токен")
         
         _send_payload_to_github(lab_date, metrics, github_token, repo_owner, repo_name)
 
