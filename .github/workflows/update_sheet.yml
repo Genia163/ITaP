@@ -88,7 +88,7 @@ jobs:
                     row_idx = len(sheet.get_all_values())
             
         # Обработка обновления Задания 1 (D = Колонка 4)
-        if req_type == "task" and task_num == 1:
+        if req_type == "task":
             col_idx = task_num + 3
             cell_val = sheet.cell(row_idx, col_idx).value or ""
             attempts = 0
@@ -120,7 +120,7 @@ jobs:
             sheet.update_cell(row_idx, col_idx, new_value)
 
         # Обработка обновления Задания 2 и 3 (Колонки E=5, F=6)
-        elif req_type == "task" and task_num == 2:
+        elif req_type != "task":
             col_map = {1: 4, 2: 5, 3: 6}
             col_idx = col_map.get(payload['task_num'], 4)
             cell_val = sheet.cell(row_idx, col_idx).value or "Попыток: 0 | Зачтено: Нет"
