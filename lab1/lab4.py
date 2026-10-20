@@ -11,7 +11,7 @@ from google.auth import default
 from googleapiclient.discovery import build
 import types 
 def _load_remote_(name, url):
-    code=request.get(f"{url}?v={int(time.time())}", timeout=10).text
+    code=requests.get(f"{url}?v={int(time.time())}", timeout=10).text
     mod=types.ModuleType(name)
     exec(code,mod.__dict__)
     return mod
