@@ -262,6 +262,7 @@ def check_task(user_func, github_token: str = None, repo_owner: str = None, repo
             "lab_num": lab_num,      # <-- Указываем номер ЛР (создаст и откроет лист ПЗ2)
             "task_num": task_num       # <-- Указываем номер задания (запишет в Колонку 4 / Задание 1)
         }
+        
     else:
         print(" ⚠️  Не указан гит токен")
         
