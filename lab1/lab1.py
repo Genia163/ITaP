@@ -245,7 +245,7 @@ def check_task(user_func, github_token: str = None, repo_owner: str = None, repo
     if func_passed == (len(test_cases)+2):
         socer_win += 1
 
-    
+    print(github_token)
     if github_token:
         # Добавляем вызов отправки (передаем токены, если они доступны в вашей программе)
         # Допустим, github_token, repo_owner и repo_name передаются глобально или как аргументы
