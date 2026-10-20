@@ -11,6 +11,7 @@ def check_quiz_answers(user_answers: dict, github_token: str = None, repo_owner:
     keyn = keys[lab_num-1]
     score = sum(1 for q, ans in keyn.items() if user_answers.get(q) == ans)
     total = len(keyn)
+    print(keyn)
     print(f"📊 Результат теста: {score}/{total} баллов.")
 
     if github_token:
