@@ -9,7 +9,14 @@ import tracemalloc
 from google.colab import auth
 from google.auth import default
 from googleapiclient.discovery import build
-from lab1 import checcheck_quiz
+import types 
+def _load_remote_(name, url):
+    code=request.get(f"{url}?v={int(time.time())}", timeout=10).text
+    mod=types.ModuleType(name)
+    exec(code,mod.__dict__)
+    return mod
+checcheck_quiz=_load_remote_(
+    "checcheck_quiz", "https://raw.githubusercontent.com/Genia163/ITaP/refs/heads/main/lab1/checcheck_quiz.py"
 
 logging.getLogger('google_auth_httplib2').setLevel(logging.ERROR)
 student_info = {"name": "", "group": "", "mail": ""}
