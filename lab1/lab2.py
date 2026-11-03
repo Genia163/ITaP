@@ -106,7 +106,7 @@ def check_task_all(user_func, dict_all_cases, github_token: str = None, repo_own
     if result:
         _send_payload_to_github(*result)
         
-def check_quiz(user_answers: dict, github_token: str = None, repo_owner: str = None, repo_name: str = None, task_num: int = None, lab_num: int = None):
+def check_quiz(user_answers: dict, github_token: str = None, repo_owner: str = None, repo_name: str = None, task_num: str = None, lab_num: int = None):
     result = checcheck_quiz.check_quiz_answers(user_answers, github_token, repo_owner, repo_name, task_num, lab_num)
     if result:
         _send_payload_to_github(*result)
