@@ -46,10 +46,6 @@ dict_all_cases={
             }
 }
 
-
-
-
-
 def set_student_info(name: str, group: str):
     """Автоматическая инициализация ФИО, группы и РЕАЛЬНОЙ почты студента"""
     try:
