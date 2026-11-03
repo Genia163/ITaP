@@ -58,7 +58,7 @@ def check_task(user_func, dict_all_cases, github_token: str = None, repo_owner: 
     tracemalloc.start()
     t0 = time.perf_counter()
     refrensiw = dict_all_cases[task_num]['reference']
-    ref_res = refrensiw(dict_all_cases[task{task_num]['stres_data'])
+    ref_res = refrensiw(dict_all_cases[task_num]['stres_data'])
     ref_time = time.perf_counter() - t0
     _, ref_peak_mem = tracemalloc.get_traced_memory()
     tracemalloc.stop()
