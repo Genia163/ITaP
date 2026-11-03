@@ -19,7 +19,7 @@ checcheck_quiz=_load_remote_(
     "checcheck_quiz", "https://raw.githubusercontent.com/Genia163/ITaP/refs/heads/main/checcheck_quiz.py"
 )
 checker_task = _load_remote_(
-    "checker_task.py", "https://raw.githubusercontent.com/Genia163/ITaP/refs/heads/main/check_tasker.py"
+    "checker_task.py", "https://raw.githubusercontent.com/Genia163/ITaP/refs/heads/main/checker_tasker.py"
 )
 
 # ----------------------------------------------------------------------
