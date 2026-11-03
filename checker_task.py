@@ -20,6 +20,7 @@ func_passed = 0
 def check_result(user_func, dict_all_cases, github_token: str = None, repo_owner: str = None, repo_name: str = None, lab_num: int= None, task_num: str = None):
     test_cases = dict_all_cases[task_num]['cases']
     select_count = 0
+    func_passed = 0
     for inp, expected, description in test_cases:
         try:
             res = user_func(inp)
@@ -35,7 +36,7 @@ def check_result(user_func, dict_all_cases, github_token: str = None, repo_owner
     return [func_passed, test_cases]
 
 def check_time_and_memory(user_func, dict_all_cases, github_token: str = None, repo_owner: str = None, repo_name: str = None, lab_num: int= None, task_num: str = None):
-    
+    func_passed = 0
     stress_data = dict_all_cases[task_num]['stres_data']
     MAX_TIME_FACTOR = dict_all_cases[task_num]['time']
     MAX_EXTRA_MEM_KB = dict_all_cases[task_num]['memory']
@@ -129,7 +130,6 @@ def check_time_and_memory(user_func, dict_all_cases, github_token: str = None, r
 # Основная функция проверки
 # ----------------------------------------------------------------------
 def check_task(user_func, dict_all_cases, github_token: str = None, repo_owner: str = None, repo_name: str = None, lab_num: int= None, task_num: str = None):
-    
     resit = check_result(user_func, dict_all_cases, github_token, repo_owner, repo_name, lab_num, task_num)  #[func_passed, test_cases]
     func_passed = resit[0]
     test_cases = resit[1]          
