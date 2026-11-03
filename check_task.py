@@ -8,7 +8,7 @@ def _timeout_handler(signum, frame):
 # ----------------------------------------------------------------------
 # Основная функция проверки
 # ----------------------------------------------------------------------
-def check_task(user_func, dict_all_cases, github_token: str = None, repo_owner: str = None, repo_name: str = None, lab_num: int= None, task_num: int = None):
+def check_task(user_func, dict_all_cases, github_token: str = None, repo_owner: str = None, repo_name: str = None, lab_num: int= None, task_num: str = None):
     """
     Комплексная проверка Задания 1:
     - Функциональные тесты на корректность вычислений
@@ -23,7 +23,7 @@ def check_task(user_func, dict_all_cases, github_token: str = None, repo_owner: 
     print("📋 ЭТАП 1: Проверка корректности работы (Функциональные тесты)")
     print("-" * 65)
 
-    test_cases = dict_all_cases[f"task{task_num}"]['cases']
+    test_cases = dict_all_cases[task_num]['cases']
     select_count = 0
     func_passed = 0
     for inp, expected, description in test_cases:
@@ -49,16 +49,16 @@ def check_task(user_func, dict_all_cases, github_token: str = None, repo_owner: 
     print("\n⚡ ЭТАП 2 и 3: Анализ производительности (Время и Память)")
     print("-" * 65)
 
-    stress_data = dict_all_cases[f"task{task_num}"]['stres_data']
+    stress_data = dict_all_cases[task_num]['stres_data']
 
-    MAX_TIME_FACTOR = dict_all_cases[f"task{task_num}"]['time']
-    MAX_EXTRA_MEM_KB = dict_all_cases[f"task{task_num}"]['memory']
+    MAX_TIME_FACTOR = dict_all_cases[task_num]['time']
+    MAX_EXTRA_MEM_KB = dict_all_cases[task_num]['memory']
 
     # --- 1. Замер эталонной функции ---
     tracemalloc.start()
     t0 = time.perf_counter()
-    refrensiw = dict_all_cases[f"task{task_num}"]['reference']
-    ref_res = refrensiw(dict_all_cases[f"task{task_num}"]['stres_data'])
+    refrensiw = dict_all_cases[task_num]['reference']
+    ref_res = refrensiw(dict_all_cases[task{task_num]['stres_data'])
     ref_time = time.perf_counter() - t0
     _, ref_peak_mem = tracemalloc.get_traced_memory()
     tracemalloc.stop()
