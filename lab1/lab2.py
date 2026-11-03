@@ -175,7 +175,7 @@ def check_task(user_func, github_token: str = None, repo_owner: str = None, repo
     timeout_occurred = False
 
     signal.signal(signal.SIGALRM, _timeout_handler)
-    signal.alarm(TIMEOUT_SECONDS)
+    signal.alarm(MAX_TIME_FACTOR)
 
     try:
         tracemalloc.start()
@@ -200,7 +200,7 @@ def check_task(user_func, github_token: str = None, repo_owner: str = None, repo
     if timeout_occurred:
         print(f"  ⏳ [ВРЕМЯ] TIME LIMIT EXCEEDED!")
         print(
-            f"     Код выполняется дольше {TIMEOUT_SECONDS} сек (вероятно, используется неоптимальный поиск/цикл O(n²)).")
+            f"     Код выполняется дольше {MAX_TIME_FACTOR} сек (вероятно, используется неоптимальный поиск/цикл O(n²)).")
         print("\n❌ Задание не зачтено из-за зависания алгоритма.")
         return
 
