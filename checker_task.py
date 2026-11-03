@@ -16,6 +16,120 @@ def _timeout_handler(signum, frame):
     raise TimeoutException("Время выполнения превысило допустимый лимит!")
 
 
+
+def check_result(user_func, dict_all_cases, github_token: str = None, repo_owner: str = None, repo_name: str = None, lab_num: int= None, task_num: str = None):
+    test_cases = dict_all_cases[task_num]['cases']
+    select_count = 0
+    func_passed = 0
+    for inp, expected, description in test_cases:
+        try:
+            res = user_func(inp)
+            assert res == expected, f"Получено {res}, ожидалось {expected}"
+            print(f"  ✅ {description} — PASSED")
+            func_passed += 1
+        except AssertionError as e:
+            print(f"  ❌ {description} — FAILED: {e}")
+        except Exception as e:
+            print(f"  ⚠️ {description} — ERROR ({type(e).__name__}): {e}")
+
+    print(f"\n📊 Результат Этапа 1: {func_passed}/{len(test_cases)} тестов пройдено.")
+    return [func_passed, test_cases]
+
+def check_time_and_memory(user_func, dict_all_cases, github_token: str = None, repo_owner: str = None, repo_name: str = None, lab_num: int= None, task_num: str = None):
+    
+    stress_data = dict_all_cases[task_num]['stres_data']
+    MAX_TIME_FACTOR = dict_all_cases[task_num]['time']
+    MAX_EXTRA_MEM_KB = dict_all_cases[task_num]['memory']
+
+    # --- 1. Замер эталонной функции ---
+    tracemalloc.start()
+    t0 = time.perf_counter()
+    refrensiw = dict_all_cases[task_num]['reference']
+    ref_res = refrensiw(dict_all_cases[task_num]['stres_data'])
+    ref_time = time.perf_counter() - t0
+    _, ref_peak_mem = tracemalloc.get_traced_memory()
+    tracemalloc.stop()
+
+    # --- 2. Замер студенческой функции с тайм-аутом ---
+    user_time = 0.0
+    user_peak_mem = 0
+    timeout_occurred = False
+
+    signal.signal(signal.SIGALRM, _timeout_handler)
+    signal.alarm(MAX_TIME_FACTOR)
+
+    try:
+        tracemalloc.start()
+        t0 = time.perf_counter()
+
+        user_res = user_func(stress_data)
+
+        user_time = time.perf_counter() - t0
+        _, user_peak_mem = tracemalloc.get_traced_memory()
+
+    except TimeoutException:
+        timeout_occurred = True
+    except Exception as e:
+        print(f"  ⚠️ Ошибка при выполнении стресс-теста: {type(e).__name__}: {e}")
+        return
+    finally:
+        signal.alarm(0)
+        if tracemalloc.is_tracing():
+            tracemalloc.stop()
+
+    # --- 3. Вывод результатов стресс-теста ---
+    if timeout_occurred:
+        print(f"  ⏳ [ВРЕМЯ] TIME LIMIT EXCEEDED!")
+        print(
+            f"     Код выполняется дольше {MAX_TIME_FACTOR} сек (вероятно, используется неоптимальный поиск/цикл O(n²)).")
+        print("\n❌ Задание не зачтено из-за зависания алгоритма.")
+        return
+
+
+    if user_res != ref_res:
+        print("  ❌ [ОШИБКА] Код вернул некорректный результат на большом массиве.")
+        return
+
+
+    time_ratio = user_time / ref_time if ref_time > 0 else 1.0
+    extra_memory_kb = (user_peak_mem - ref_peak_mem) / 1024
+
+    print(
+        f"  ⏱ Время работы:  {user_time * 1000:.2f} ms (Эталон: {ref_time * 1000:.2f} ms | Соотношение: {time_ratio:.2f}x)")
+    print(f"  💾 Пиковая память: {user_peak_mem / (1024 * 1024):.2f} MB (Избыток: {max(0, extra_memory_kb):.1f} KB)")
+
+    # --- 4. Проверка критериев эффективности ---
+    perf_errors = []
+
+    if time_ratio > MAX_TIME_FACTOR:
+        perf_errors.append(
+            f"Код работает слишком медленно ({time_ratio:.1f}x от эталона, порог {MAX_TIME_FACTOR}x)."
+        )
+    else:
+        func_passed+=1
+
+    if extra_memory_kb > MAX_EXTRA_MEM_KB:
+        perf_errors.append(
+            f"Выделено избыточных {extra_memory_kb:.1f} KB ОЗУ (проверьте, нет ли лишних списков/копий)."
+        )
+    else:
+        func_passed+=1
+
+    print("-" * 65)
+    if perf_errors:
+        print("❌ Задание не зачтено из-за неэффективности:")
+        for err in perf_errors:
+            print(f"   • {err}")
+    else:
+        print(f"🎉 ВСЕ ТЕСТЫ И БЕНЧМАРКИ УСПЕШНО ПРОЙДЕНЫ!")
+    
+    socer_win = 0
+    if func_passed == (len(test_cases)+2):
+        socer_win += 1
+
+    return user_time, ref_time, user_peak_mem, extra_memory_kb
+
+
 # ----------------------------------------------------------------------
 # Основная функция проверки
 # ----------------------------------------------------------------------
