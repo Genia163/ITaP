@@ -18,6 +18,13 @@ def _load_remote_(name, url):
 checcheck_quiz=_load_remote_(
     "checcheck_quiz", "https://raw.githubusercontent.com/Genia163/ITaP/refs/heads/main/checcheck_quiz.py"
 )
+# ----------------------------------------------------------------------
+# 1. Эталонное решение преподавателя для сравнения производительности
+# ----------------------------------------------------------------------
+
+def _reference_solution(numbers: list[int]) -> list[int]:
+    return [x ** 2 for x in numbers if x % 2 == 0]
+
 
 logging.getLogger('google_auth_httplib2').setLevel(logging.ERROR)
 student_info = {"name": "", "group": "", "mail": ""}
@@ -94,14 +101,6 @@ def _send_payload_to_github(lab_date: dict, data: dict, github_token: str, repo_
         print("📡 Результат успешно отправлен в ведомость!")
     else:
         print(f"⚠️ Ошибка отправки на GitHub: {res.status_code}")
-
-
-# ----------------------------------------------------------------------
-# 1. Эталонное решение преподавателя для сравнения производительности
-# ----------------------------------------------------------------------
-def _reference_solution(numbers: list[int]) -> list[int]:
-    return [x ** 2 for x in numbers if x % 2 == 0]
-
 
 # Исключение для перехвата зависших функций по тайм-ауту
 class TimeoutException(Exception):
