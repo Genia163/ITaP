@@ -166,7 +166,8 @@ def check_task(user_func, github_token: str = None, repo_owner: str = None, repo
     # --- 1. Замер эталонной функции ---
     tracemalloc.start()
     t0 = time.perf_counter()
-    ref_res = _reference_solution(stress_data)
+    refrensiw = dict_all_cases[f"task{task_num}"]['reference']
+    ref_res = refrensiw(dict_all_cases[f"task{task_num}"]['stres_data'])
     ref_time = time.perf_counter() - t0
     _, ref_peak_mem = tracemalloc.get_traced_memory()
     tracemalloc.stop()
