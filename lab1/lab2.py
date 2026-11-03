@@ -18,6 +18,10 @@ def _load_remote_(name, url):
 checcheck_quiz=_load_remote_(
     "checcheck_quiz", "https://raw.githubusercontent.com/Genia163/ITaP/refs/heads/main/checcheck_quiz.py"
 )
+check_task = load_remote_(
+    "check_task.py", "https://raw.githubusercontent.com/Genia163/ITaP/refs/heads/main/lab1/check_task.py"
+)
+
 # ----------------------------------------------------------------------
 # 1. Эталонное решение преподавателя для сравнения производительности
 # ----------------------------------------------------------------------
