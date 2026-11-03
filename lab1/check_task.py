@@ -1,6 +1,6 @@
 class TimeoutException(Exception):
     pass
-  
+
 def _timeout_handler(signum, frame):
     raise TimeoutException("Время выполнения превысило допустимый лимит!")
   
