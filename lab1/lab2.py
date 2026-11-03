@@ -21,22 +21,25 @@ checcheck_quiz=_load_remote_(
 
 logging.getLogger('google_auth_httplib2').setLevel(logging.ERROR)
 student_info = {"name": "", "group": "", "mail": ""}
-all_cases = [
-    [
+
+dict_all_cases={
+    "task1":{'reference': _reference_solution,'cases': [
         ([1, 2, 3, 4, 5, 6], [4, 16, 36], "Тест 1.1: Базовый список [1, 2, 3, 4, 5, 6]"),
         ([1, 3, 5], [], "Тест 1.2: Список без чётных чисел [1, 3, 5]"),
         ([-4, -3, 0, 2], [16, 0, 4], "Тест 1.3: Отрицательные числа и ноль [-4, -3, 0, 2]"),
-        ([], [], "Тест 1.4: Пустой список []"),
-        3, 3.0, 1024
-    ],  
-    [  
+        ([], [], "Тест 1.4: Пустой список []")],
+             'time': 3, 'memory': 1024, 'stres_data': list(range(1, 200_000))
+            },
+    "task2":{'reference': _reference_solution ,'cases': [
         ([1, 2, 3, 4, 5, 6], [4, 16, 36], "345243535"),
         ([1, 3, 5], [], "456w4576"),
         ([-4, -3, 0, 2], [16, 0, 4], "231435346456"),
-        ([], [], "12112121212"),
-        3, 3.0, 1024
-    ]
-]
+        ([], [], "12112121212")],
+             'time': 3, 'memory': 1024, 'stres_data': list(range(1, 200_000))
+            }
+}
+
+
 
 
 
@@ -113,13 +116,14 @@ def _timeout_handler(signum, frame):
 # Основная функция проверки
 # ----------------------------------------------------------------------
 def check_task(user_func, github_token: str = None, repo_owner: str = None, repo_name: str = None, lab_num: int= None, task_num: int = None):
-    print("12121")
     """
     Комплексная проверка Задания 1:
     - Функциональные тесты на корректность вычислений
     - Замер времени работы (Benchmark)
     - Замер расхода памяти (Memory Profiling)
     """
+    
+    
     print("🚀 Старт комплексной проверки Задания 1\n" + "=" * 65)
    
     # ------------------------------------------------------------------
@@ -128,8 +132,7 @@ def check_task(user_func, github_token: str = None, repo_owner: str = None, repo
     print("📋 ЭТАП 1: Проверка корректности работы (Функциональные тесты)")
     print("-" * 65)
 
-    test_metric = all_cases[task_num-1] 
-    test_cases = test_metric[:-3]
+    test_cases = dict_all_cases[f"task{task_num}"]['cases']
     select_count = 0
     func_passed = 0
     for inp, expected, description in test_cases:
@@ -155,11 +158,10 @@ def check_task(user_func, github_token: str = None, repo_owner: str = None, repo
     print("\n⚡ ЭТАП 2 и 3: Анализ производительности (Время и Память)")
     print("-" * 65)
 
-    stress_data = list(range(1, 200_000))
+    stress_data = dict_all_cases[f"task{task_num}"]['stres_data']
 
-    TIMEOUT_SECONDS =test_metric[-3]
-    MAX_TIME_FACTOR = test_metric[-2]
-    MAX_EXTRA_MEM_KB = test_metric[-1]
+    MAX_TIME_FACTOR = dict_all_cases[f"task{task_num}"]['time']
+    MAX_EXTRA_MEM_KB = dict_all_cases[f"task{task_num}"]['memory']
 
     # --- 1. Замер эталонной функции ---
     tracemalloc.start()
