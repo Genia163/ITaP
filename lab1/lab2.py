@@ -22,6 +22,30 @@ checker_task = _load_remote_(
     "check_task.py", "https://raw.githubusercontent.com/Genia163/ITaP/refs/heads/main/check_task.py"
 )
 
+# ----------------------------------------------------------------------
+# 1. Эталонное решение преподавателя для сравнения производительности
+# ----------------------------------------------------------------------
+
+def _reference_solution(numbers: list[int]) -> list[int]:
+    return [x ** 2 for x in numbers if x % 2 == 0]
+
+dict_all_cases={
+    "task1":{'reference': _reference_solution,'cases': [
+        ([1, 2, 3, 4, 5, 6], [4, 16, 36], "Тест 1.1: Базовый список [1, 2, 3, 4, 5, 6]"),
+        ([1, 3, 5], [], "Тест 1.2: Список без чётных чисел [1, 3, 5]"),
+        ([-4, -3, 0, 2], [16, 0, 4], "Тест 1.3: Отрицательные числа и ноль [-4, -3, 0, 2]"),
+        ([], [], "Тест 1.4: Пустой список []")],
+             'time': 3, 'memory': 1024, 'stres_data': list(range(1, 200_000))
+            },
+    "task2":{'reference': _reference_solution ,'cases': [
+        ([1, 2, 3, 4, 5, 6], [4, 16, 36], "345243535"),
+        ([1, 3, 5], [], "456w4576"),
+        ([-4, -3, 0, 2], [16, 0, 4], "231435346456"),
+        ([], [], "12112121212")],
+             'time': 3, 'memory': 1024, 'stres_data': list(range(1, 200_000))
+            }
+}
+
 logging.getLogger('google_auth_httplib2').setLevel(logging.ERROR)
 student_info = {"name": "", "group": "", "mail": ""}
 
@@ -77,8 +101,8 @@ def _send_payload_to_github(lab_date: dict, data: dict, github_token: str, repo_
     else:
         print(f"⚠️ Ошибка отправки на GitHub: {res.status_code}")
 
-def check_task_all(user_func, github_token: str = None, repo_owner: str = None, repo_name: str = None, lab_num: int= None, task_num: int = None):
-    result = check_task.checker_task(user_func, github_token, repo_owner, repo_name, lab_num, task_num)
+def check_task_all(user_func, dict_all_cases, github_token: str = None, repo_owner: str = None, repo_name: str = None, lab_num: int= None, task_num: int = None):
+    result = check_task.checker_task(user_func, dict_all_cases, github_token, repo_owner, repo_name, lab_num, task_num)
     if result:
         _send_payload_to_github(*result)
         
