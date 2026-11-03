@@ -260,12 +260,12 @@ def check_task(user_func, github_token: str = None, repo_owner: str = None, repo
             "lab_num": lab_num,      # <-- Указываем номер ЛР (создаст и откроет лист ПЗ2)
             "task_num": task_num       # <-- Указываем номер задания (запишет в Колонку 4 / Задание 1)
         }
-        
+       
+        _send_payload_to_github(lab_date, metrics, github_token, repo_owner, repo_name)
+    
     else:
         print(" ⚠️  Не указан гит токен")
         
-        _send_payload_to_github(lab_date, metrics, github_token, repo_owner, repo_name)
-
 def check_quiz(user_answers: dict, github_token: str = None, repo_owner: str = None, repo_name: str = None, task_num: int = None, lab_num: int = None):
     result = checcheck_quiz.check_quiz_answers(user_answers, github_token, repo_owner, repo_name, task_num, lab_num)
     if result:
