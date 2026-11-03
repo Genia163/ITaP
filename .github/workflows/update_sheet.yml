@@ -42,7 +42,9 @@ jobs:
         lab = payload.get('type', {})
         req_type = str(lab.get("repo_type", "task")).strip()
         lab_num = int(lab.get("lab_num", 1)) 
-        task_num = int(lab.get("task_num", 1))
+        task_e = str(lab.get("task_num", "task")).strip()
+        task_num = int(task_e[-1])
+
         
         sheet_num = f"ПЗ{lab_num}"
         header = ["Студент", "Группа", "Почта", "Задание 1", "Задание 2", "Задание 3", "Тестирование"]
