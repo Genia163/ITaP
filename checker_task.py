@@ -16,11 +16,10 @@ def _timeout_handler(signum, frame):
     raise TimeoutException("Время выполнения превысило допустимый лимит!")
 
 
-
+func_passed = 0
 def check_result(user_func, dict_all_cases, github_token: str = None, repo_owner: str = None, repo_name: str = None, lab_num: int= None, task_num: str = None):
     test_cases = dict_all_cases[task_num]['cases']
     select_count = 0
-    func_passed = 0
     for inp, expected, description in test_cases:
         try:
             res = user_func(inp)
