@@ -6,7 +6,7 @@ keys = [
 
 
 
-def check_quiz_answers(user_answers: dict, github_token: str = None, repo_owner: str = None, repo_name: str = None, task_num: int = None, lab_num: str = None):
+def check_quiz_answers(user_answers: dict, github_token: str = None, repo_owner: str = None, repo_name: str = None, task_num: str = None, lab_num: str = None):
     """Проверка ответов викторины и отправка балла"""
     keyn = keys[int(lab_num[-1])]
     score = sum(1 for q, ans in keyn.items() if user_answers.get(q) == ans)
