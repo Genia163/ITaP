@@ -44,8 +44,12 @@ jobs:
         lab_num = int(lab.get("lab_num", 1)) 
         task_e = str(lab.get("task_num", "task")).strip()
         task_num = int(task_e[-1])
+        lst_task = []
 
-        
+        if task_num not in lst_task:
+            lst_task.append(task_num)
+            lst_task = sorted(lst_task)
+      
         sheet_num = f"ПЗ{lab_num}"
         header = ["Студент", "Группа", "Почта", "Задание 1", "Задание 2", "Задание 3", "Тестирование"]
         row_idx = None
@@ -123,7 +127,7 @@ jobs:
        
         # Обработка обновления Тестирования (уже на втором листе, например, в колонку D=4)
         elif req_type == "quiz":
-            col_idx = 7  # На втором листе под результаты тестов можно выделить колонку D
+            col_idx = lst_task[-1]  
             cell_val = sheet.cell(row_idx, col_idx).value or "Попыток: 0 | Балл: 0/0"
             attempts = 0
             if "Попыток:" in cell_val:
