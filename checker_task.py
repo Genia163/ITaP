@@ -126,17 +126,24 @@ def check_task(user_func, dict_all_cases, github_token: str = None, repo_owner: 
     resit = check_result(user_func, dict_all_cases, task_num)  #[func_passed, test_cases]
     func_passed = resit[0]
     test_cases = resit[1]          
+   
+    memory_and_time = check_time_and_memory(user_func, dict_all_cases, task_num) #[func_passed, user_time, ref_time, user_peak_mem, extra_memory_kb]
+    func_passed = memory_and_time[0]+func_passed  # т.к 2 функции
     try:
-        memory_and_time = check_time_and_memory(user_func, dict_all_cases, task_num) #[func_passed, user_time, ref_time, user_peak_mem, extra_memory_kb]
-        func_passed = memory_and_time[0]+func_passed  # т.к 2 функции
         user_time = memory_and_time[1]
+    except TypeError:
+         user_time = 0.0
+    try:
         ref_time = memory_and_time[2]
+    except TypeError:
+        ref_time = 0.0
+    try:
         user_peak_mem = memory_and_time[3]
+    except TypeError:
+        user_peak_mem = 0
+    try:
         extra_memory_kb = memory_and_time[4]
     except TypeError:
-        user_time = 0.0
-        ref_time = 0.0
-        user_peak_mem = 0
         extra_memory_kb = 0.0
 
     
