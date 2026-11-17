@@ -103,12 +103,12 @@ def _send_payload_to_github(lab_date: dict, data: dict, github_token: str, repo_
     else:
         print(f"⚠️ Ошибка отправки на GitHub: {res.status_code}")
 
-def check_task_all(user_func, github_token: str = None, repo_owner: str = None, repo_name: str = None, task_num: str = None, lab_num: int= None):
+def check_task_all(user_func, github_token: str = None, repo_owner: str = None, repo_name: str = None, task_num: str = None):
     result = checker_task.check_task(user_func, dict_all_cases, github_token, repo_owner, repo_name, lab_num, task_num)
     if result:
         _send_payload_to_github(*result)
         
-def check_quiz(user_answers: dict, github_token: str = None, repo_owner: str = None, repo_name: str = None, task_num: str = None, lab_num: int = None):
+def check_quiz(user_answers: dict, github_token: str = None, repo_owner: str = None, repo_name: str = None, task_num: str = None):
     result = checcheck_quiz.check_quiz_answers(user_answers, github_token, repo_owner, repo_name, task_num, lab_num)
     if result:
         _send_payload_to_github(*result)
