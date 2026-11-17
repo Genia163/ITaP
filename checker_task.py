@@ -132,21 +132,16 @@ def check_task(user_func, dict_all_cases, github_token: str = None, repo_owner: 
     print(memory_and_time)
     try:
         user_time = memory_and_time[1]
-    except TypeError:
-         user_time = 0.0
-    try:
         ref_time = memory_and_time[2]
-    except TypeError:
-        ref_time = 0.0
-    try:
         user_peak_mem = memory_and_time[3]
-    except TypeError:
-        user_peak_mem = 0
-    try:
         extra_memory_kb = memory_and_time[4]
     except TypeError:
+        user_time = 0.0
+        ref_time = 0.0
+        user_peak_mem = 0
         extra_memory_kb = 0.0
-
+        print(user_time,ref_time,user_peak_mem,extra_memory_kb)
+    
     
     if github_token:
         # Добавляем вызов отправки (передаем токены, если они доступны в вашей программе)
