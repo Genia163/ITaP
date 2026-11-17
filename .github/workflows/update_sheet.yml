@@ -25,33 +25,30 @@ jobs:
         from oauth2client.service_account import ServiceAccountCredentials
         
         # Авторизация в Google API
-        scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
+        scope = ['https://google.com', 'https://googleapis.com']
         key_dict = json.loads(os.environ['GCP_SA_KEY'])
         creds = ServiceAccountCredentials.from_json_keyfile_dict(key_dict, scope)
         client = gspread.authorize(creds)
-        
+
         # Открываем саму таблицу
         spreadsheet = client.open_by_key(os.environ['SPREADSHEET_ID'])
-        
+
         payload = json.loads(os.environ['PAYLOAD'])
-        student = payload['student']
-        group = payload['group']
-        mail = payload.get('mail', '')
-        
-        # Безопасно разбираем вложенный словарь payload['type']
+        student = str(payload['student']).strip()
+        group = str(payload['group']).strip()
+        mail = str(payload.get('mail', '')).strip()
+
+        # Безопасно разбираем payload['type']
         lab = payload.get('type', {})
         req_type = str(lab.get("repo_type", "task")).strip()
-        lab_num = int(lab.get("lab_num", 1)) 
-        task_e = str(lab.get("task_num", "task")).strip()
-        task_num = int(task_e[-1])
-        
+        lab_num = int(lab.get("lab_num", 1))
 
+        # Безопасно достаем номер задания (если это не тест)
         task_num = None
         if req_type == "task":
             task_e = str(lab.get("task_num", "")).strip()
             match = re.search(r'\d+', task_e)
             task_num = int(match.group()) if match else 1
-
 
         sheet_num = f"ПЗ{lab_num}"
         base_header = ["Студент", "Группа", "Почта", "Тестирование"]
@@ -60,19 +57,19 @@ jobs:
             sheet = spreadsheet.worksheet(sheet_num)
             first_row = sheet.row_values(1)
             if not first_row or all(val.strip() == "" for val in first_row):
-                sheet.update('A1', [base_header])
+                sheet.update(range_name='A1', values=[base_header])
                 first_row = base_header.copy()
         except gspread.exceptions.WorksheetNotFound:
             sheet = spreadsheet.add_worksheet(title=sheet_num, rows="100", cols="20")
-            sheet.update('A1', [base_header])
+            sheet.update(range_name='A1', values=[base_header])
             first_row = base_header.copy()
+
+        # Динамически добавляем колонку задания, если её ещё нет
         if req_type == "task" and task_num is not None:
             target_col_name = f"Задание {task_num}"
             if target_col_name not in first_row:
-                # Определяем позицию перед колонкой "Тестирование" (или в конец)
                 quiz_idx = first_row.index("Тестирование") if "Тестирование" in first_row else len(first_row)
         
-                # Ищем правильное место по порядку номеров (чтобы Задание 2 встало перед Задание 3)
                 insert_pos = quiz_idx
                 for i in range(3, quiz_idx):
                     m = re.search(r'\d+', first_row[i])
@@ -80,77 +77,72 @@ jobs:
                         insert_pos = i
                         break
         
-        # Вставляем физическую колонку в Google Таблицу со сдвигом данных вправо
-        sheet.insert_cols([[target_col_name]], col=insert_pos + 1)
-        first_row.insert(insert_pos, target_col_name)
-        if sheet_is_new_or_empty:
-            sheet.append_row([student, group, mail, "", "", "", ""])
-            row_idx = 2
-        if row_idx is None:
-            records = sheet.get_all_values()
-        
-        # Поиск или добавление строки студента
-        records = sheet.get_all_values()
-        row_idx = None
+                sheet.insert_cols([[target_col_name]], col=insert_pos + 1)
+                first_row.insert(insert_pos, target_col_name)
 
-        for i, row in enumerate(records[1:], start=2):
-            r_student = str(row[0]).strip() if len(row) > 0 else ""
-            r_group = str(row[1]).strip() if len(row) > 1 else ""
-            r_mail = str(row[2]).strip() if len(row) > 2 else ""
+          # Поиск или добавление строки студента
+          records = sheet.get_all_values()
+          row_idx = None
+
+          for i, row in enumerate(records[1:], start=2):
+              r_student = str(row[0]).strip() if len(row) > 0 else ""
+              r_group = str(row[1]).strip() if len(row) > 1 else ""
+              r_mail = str(row[2]).strip() if len(row) > 2 else ""
     
-            if (r_student == student and r_group == group) or (mail and r_mail == mail):
-                row_idx = i
-                break
+              if (r_student == student and r_group == group) or (mail and r_mail == mail):
+                  row_idx = i
+                  break
 
-        if not row_idx:
-            new_row = [student, group, mail] + [""] * (len(first_row) - 3)
-            sheet.append_row(new_row)
-            row_idx = len(records) + 1
-            
-        # Обработка обновления Задания 1 (D = Колонка 4)
-        if req_type == "task":
-            col_idx = first_row.index(f"Задание {task_num}") + 1
-            cell_val = sheet.cell(row_idx, col_idx).value or ""
-            attempts = 0
-            attempts_luck = 0
-            attempts_bad = 0
-            
-            if "Попытки удачные:" in cell_val or "Попытки неудачные:" in cell_val:
-                under = cell_val.split("|")[0]
-                attempts_luck = int(under.split("/")[0].replace("Попытки удачные:", "").strip())
-                attempts_bad = int(under.split("/")[1].replace("Попытки неудачные:", "").strip())
-                attempts = attempts_luck + attempts_bad
-            attempts += 1
+          if not row_idx:
+              new_row = [student, group, mail] + [""] * (len(first_row) - 3)
+              sheet.append_row(new_row)
+              row_idx = len(records) + 1
+          
+          # Запись результатов задания
+          if req_type == "task":
+              col_idx = first_row.index(f"Задание {task_num}") + 1
+              cell_val = sheet.cell(row_idx, col_idx).value or ""
+    
+              attempts_luck = 0
+              attempts_bad = 0
+              if "Попытки удачные:" in cell_val:
+                  under = cell_val.split("|")[0]
+                  parts = under.split("/")
+                  attempts_luck = int(parts[0].replace("Попытки удачные:", "").strip())
+                  attempts_bad = int(parts[1].replace("Попытки неудачные:", "").strip())
 
-            
-            total = payload.get('total', 0)
-            score = payload.get('score', 0)
-            time_ms = payload.get('time_ms', 0.0)
-            ref_time = payload.get('ref_time', 0.0)
-            memory_mb = payload.get('memory_mb', 0.0)
-            extra_memory = payload.get('extra_memory', 0.0)
+              total = payload.get('total', 0)
+              score = payload.get('score', 0)
+              time_ms = payload.get('time_ms', 0.0)
+              ref_time = payload.get('ref_time', 0.0)
+              memory_mb = payload.get('memory_mb', 0.0)
+              extra_memory = payload.get('extra_memory', 0.0)
 
-            if score == total:
-                attempts_luck += 1
-                unlack = attempts_bad
-            else:
-                unlack = attempts - attempts_luck
+              if score == total:
+                  attempts_luck += 1
+              else:
+                  attempts_bad += 1
 
-            new_value = f"Попытки удачные: {attempts_luck} / Попытки неудачные: {unlack} | Балл: {score}/{total} | Время: {time_ms}ms (Эталон: {ref_time}ms) | Память: {memory_mb}MB (Избыток: {extra_memory}KB)"
-            sheet.update_cell(row_idx, col_idx, new_value)
-       
-        # Обработка обновления Тестирования (уже на втором листе, например, в колонку D=4)
-        elif req_type == "quiz":
-            col_idx = first_row.index("Тестирование") + 1  
-            cell_val = sheet.cell(row_idx, col_idx).value or "Попыток: 0 | Балл: 0/0"
-            attempts = 0
-            if "Попыток:" in cell_val:
-                try:
-                    attempts = int(cell_val.split("|")[0].replace("Попыток:", "").strip())
-                except Exception:
-                    pass
-            attempts += 1
-            score_str = f"{payload['score']}/{payload['total']}"
-            sheet.update_cell(row_idx, col_idx, f"Попыток: {attempts} | Балл: {score_str}")
+              new_value = f"Попытки удачные: {attempts_luck} / Попытки неудачные: {attempts_bad} | Балл: {score}/{total} | Время: {time_ms}ms (Эталон: {ref_time}ms) | Память: {memory_mb}MB (Избыток: {extra_memory}KB)"
+              sheet.update_cell(row_idx, col_idx, new_value)
+
+          # Запись результатов тестирования
+          elif req_type == "quiz":
+              if "Тестирование" not in first_row:
+                  sheet.update_cell(1, len(first_row) + 1, "Тестирование")
+                  first_row.append("Тестирование")
+        
+              col_idx = first_row.index("Тестирование") + 1
+              cell_val = sheet.cell(row_idx, col_idx).value or ""
+    
+              attempts = 0
+              if "Попыток:" in cell_val:
+                  try:
+                      attempts = int(cell_val.split("|")[0].replace("Попыток:", "").strip())
+                  except Exception:
+                      pass
+              attempts += 1
+              score_str = f"{payload.get('score', 0)}/{payload.get('total', 0)}"
+              sheet.update_cell(row_idx, col_idx, f"Попыток: {attempts} | Балл: {score_str}")
         EOF
 
