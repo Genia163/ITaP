@@ -29,20 +29,32 @@ checker_task = _load_remote_(
 def _reference_solution(numbers: list[int]) -> list[int]:
     return [x ** 2 for x in numbers if x % 2 == 0]
 
+def get_unique_sorted(numbers: tuple[int | float, ...]) -> tuple[int | float, ...]:
+    return tuple(sorted(set(numbers)))
+
 dict_all_cases={
-    "task1":{'reference': _reference_solution,'cases': [
+    "task1":{
+        'reference': _reference_solution,
+        'cases': [
         ([1, 2, 3, 4, 5, 6], [4, 16, 36], "Тест 1.1: Базовый список [1, 2, 3, 4, 5, 6]"),
         ([1, 3, 5], [], "Тест 1.2: Список без чётных чисел [1, 3, 5]"),
         ([-4, -3, 0, 2], [16, 0, 4], "Тест 1.3: Отрицательные числа и ноль [-4, -3, 0, 2]"),
-        ([], [], "Тест 1.4: Пустой список []")],
-             'time': 3, 'memory': 1024, 'stres_data': list(range(1, 200_000))
+        ([], [], "Тест 1.4: Пустой список []")
+        ],
+        'time': 3, 
+        'memory': 1024, 
+        'stres_data': list(range(1, 200_000))
             },
-    "task2":{'reference': _reference_solution ,'cases': [
-        ([1, 2, 3, 4, 5, 6], [4, 16, 36], "345243535"),
-        ([1, 3, 5], [], "456w4576"),
-        ([-4, -3, 0, 2], [16, 0, 4], "231435346456"),
-        ([], [], "12112121212")],
-             'time': 3, 'memory': 1024, 'stres_data': list(range(1, 200_000))
+    "task2":{'reference': get_unique_sorted ,'cases': [
+        ((5, 2, 9, 1, 5, 6, 2), (1, 2, 5, 6, 9), "Тест 1.1: Базовый кортеж с дубликатами (5, 2, 9, 1, 5, 6, 2)"),
+        ((1, 2, 3, 4), (1, 2, 3, 4), "Тест 1.2: Кортеж без дубликатов (1, 2, 3, 4)"),
+        ((-4, 0, -4, 3.5, 2, 0), (-4, 0, 2, 3.5), "Тест 1.3: Отрицательные числа, дробные и ноль (-4, 0, -4, 3.5, 2, 0)"),
+        ((7, 7, 7, 7), (7,), "Тест 1.4: Кортеж из одинаковых элементов (7, 7, 7, 7)"),
+        ((), (), "Тест 1.5: Пустой кортеж ()")
+    ],
+    'time': 1, 
+    'memory': 256, 
+    'stres_data': tuple(range(200_000, 0, -1)) + tuple(range(1, 200_000))
             }
 }
 
