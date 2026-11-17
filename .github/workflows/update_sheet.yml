@@ -54,7 +54,7 @@ jobs:
 
 
         sheet_num = f"ПЗ{lab_num}"
-        header = ["Студент", "Группа", "Почта", "Тестирование"]
+        base_header = ["Студент", "Группа", "Почта", "Тестирование"]
 
         try:
             sheet = spreadsheet.worksheet(sheet_num)
