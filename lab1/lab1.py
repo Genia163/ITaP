@@ -49,6 +49,8 @@ dict_all_cases={
 logging.getLogger('google_auth_httplib2').setLevel(logging.ERROR)
 student_info = {"name": "", "group": "", "mail": ""}
 
+lab_num = 1
+
 def set_student_info(name: str, group: str):
     """Автоматическая инициализация ФИО, группы и РЕАЛЬНОЙ почты студента"""
     try:
@@ -101,7 +103,7 @@ def _send_payload_to_github(lab_date: dict, data: dict, github_token: str, repo_
     else:
         print(f"⚠️ Ошибка отправки на GitHub: {res.status_code}")
 
-def check_task_all(user_func, github_token: str = None, repo_owner: str = None, repo_name: str = None, lab_num: int= None, task_num: str = None):
+def check_task_all(user_func, github_token: str = None, repo_owner: str = None, repo_name: str = None, task_num: str = None, lab_num: int= None):
     result = checker_task.check_task(user_func, dict_all_cases, github_token, repo_owner, repo_name, lab_num, task_num)
     if result:
         _send_payload_to_github(*result)
