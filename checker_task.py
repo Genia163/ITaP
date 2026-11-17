@@ -13,6 +13,8 @@ def _timeout_handler(signum, frame):
 func_passed = 0
 def check_result(user_func, dict_all_cases, task_num: str = None):
     test_cases = dict_all_cases[task_num]['cases']
+    print(task_num) 
+    print(test_cases) 
     select_count = 0
     func_passed = 0
     for inp, expected, description in test_cases:
