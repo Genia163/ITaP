@@ -49,7 +49,7 @@ dict_all_cases={
 logging.getLogger('google_auth_httplib2').setLevel(logging.ERROR)
 student_info = {"name": "", "group": "", "mail": ""}
 
-lab_num = 1
+lab_num = 1  #<-- Номер лабы
 
 def set_student_info(name: str, group: str):
     """Автоматическая инициализация ФИО, группы и РЕАЛЬНОЙ почты студента"""
