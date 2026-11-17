@@ -23,7 +23,7 @@ jobs:
         python - << 'EOF'
         import os, json, gspread
         from oauth2client.service_account import ServiceAccountCredentials
-        lst_task = []
+        
         # Авторизация в Google API
         scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
         key_dict = json.loads(os.environ['GCP_SA_KEY'])
@@ -46,57 +46,70 @@ jobs:
         task_num = int(task_e[-1])
         
 
-        if task_num not in lst_task:
-            lst_task.append(task_num)
-            lst_task = sorted(lst_task)
+        task_num = None
+        if req_type == "task":
+            task_e = str(lab.get("task_num", "")).strip()
+            match = re.search(r'\d+', task_e)
+            task_num = int(match.group()) if match else 1
 
-        print(lst_task)
+
         sheet_num = f"ПЗ{lab_num}"
-        header = ["Студент", "Группа", "Почта", "Задание 1", "Задание 2", "Задание 3", "Тестирование"]
-        row_idx = None
-        sheet_is_new_or_empty = False
+        header = ["Студент", "Группа", "Почта", "Тестирование"]
+
         try:
             sheet = spreadsheet.worksheet(sheet_num)
             first_row = sheet.row_values(1)
             if not first_row or all(val.strip() == "" for val in first_row):
-                sheet.append_row(header)
-                sheet_is_new_or_empty = True
+                sheet.update('A1', [base_header])
+                first_row = base_header.copy()
         except gspread.exceptions.WorksheetNotFound:
-            # Если листа нет вообще — создаем и заполняем
             sheet = spreadsheet.add_worksheet(title=sheet_num, rows="100", cols="20")
-            sheet.append_row(header)
-            sheet_is_new_or_empty = True
-
+            sheet.update('A1', [base_header])
+            first_row = base_header.copy()
+        if req_type == "task" and task_num is not None:
+            target_col_name = f"Задание {task_num}"
+            if target_col_name not in first_row:
+                # Определяем позицию перед колонкой "Тестирование" (или в конец)
+                quiz_idx = first_row.index("Тестирование") if "Тестирование" in first_row else len(first_row)
+        
+                # Ищем правильное место по порядку номеров (чтобы Задание 2 встало перед Задание 3)
+                insert_pos = quiz_idx
+                for i in range(3, quiz_idx):
+                    m = re.search(r'\d+', first_row[i])
+                    if m and int(m.group()) > task_num:
+                        insert_pos = i
+                        break
+        
+        # Вставляем физическую колонку в Google Таблицу со сдвигом данных вправо
+        sheet.insert_cols([[target_col_name]], col=insert_pos + 1)
+        first_row.insert(insert_pos, target_col_name)
         if sheet_is_new_or_empty:
             sheet.append_row([student, group, mail, "", "", "", ""])
             row_idx = 2
         if row_idx is None:
             records = sheet.get_all_values()
         
-        # Поиск строки студента (колонки: A - Студент, B - Группа, C - Почта)
-            if len(records) <= 1:
-                sheet.append_row([student, group, mail, "", "", "", ""])
-                row_idx = len(sheet.get_all_values())
-            else:
-                # Ищем студента среди существующих записей
-                for i, row in enumerate(records[1:], start=2):
-                    if len(row) >= 3:
-                        r_student = str(row[0]).strip()
-                        r_group = str(row[1]).strip()
-                        r_mail = str(row[2]).strip()
-                        
-                        if (r_student == student and r_group == group) or (mail and r_mail == mail):
-                            row_idx = i
-                            break
-                            
-                # Если лист существовал, но этого конкретного студента на нем еще не было
-                if not row_idx:
-                    sheet.append_row([student, group, mail, "", "", "", ""])
-                    row_idx = len(sheet.get_all_values())
+        # Поиск или добавление строки студента
+        records = sheet.get_all_values()
+        row_idx = None
+
+        for i, row in enumerate(records[1:], start=2):
+            r_student = str(row[0]).strip() if len(row) > 0 else ""
+            r_group = str(row[1]).strip() if len(row) > 1 else ""
+            r_mail = str(row[2]).strip() if len(row) > 2 else ""
+    
+            if (r_student == student and r_group == group) or (mail and r_mail == mail):
+                row_idx = i
+                break
+
+        if not row_idx:
+            new_row = [student, group, mail] + [""] * (len(first_row) - 3)
+            sheet.append_row(new_row)
+            row_idx = len(records) + 1
             
         # Обработка обновления Задания 1 (D = Колонка 4)
         if req_type == "task":
-            col_idx = task_num + 3
+            col_idx = first_row.index(f"Задание {task_num}") + 1
             cell_val = sheet.cell(row_idx, col_idx).value or ""
             attempts = 0
             attempts_luck = 0
@@ -128,7 +141,7 @@ jobs:
        
         # Обработка обновления Тестирования (уже на втором листе, например, в колонку D=4)
         elif req_type == "quiz":
-            col_idx = lst_task[-1]  
+            col_idx = first_row.index("Тестирование") + 1  
             cell_val = sheet.cell(row_idx, col_idx).value or "Попыток: 0 | Балл: 0/0"
             attempts = 0
             if "Попыток:" in cell_val:
