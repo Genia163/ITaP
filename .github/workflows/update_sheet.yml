@@ -23,7 +23,7 @@ jobs:
         python - << 'EOF'
         import os, json, gspread
         from oauth2client.service_account import ServiceAccountCredentials
-
+        lst_task = []
         # Авторизация в Google API
         scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
         key_dict = json.loads(os.environ['GCP_SA_KEY'])
@@ -44,7 +44,7 @@ jobs:
         lab_num = int(lab.get("lab_num", 1)) 
         task_e = str(lab.get("task_num", "task")).strip()
         task_num = int(task_e[-1])
-        lst_task = []
+        
 
         if task_num not in lst_task:
             lst_task.append(task_num)
